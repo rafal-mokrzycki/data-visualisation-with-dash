@@ -1,7 +1,7 @@
 import dash
 import pandas as pd
 import plotly.express as px
-from dash import Input, Output, dcc, html
+from dash import Input, Output, State, dcc, html
 
 # Sample data
 df = pd.DataFrame(
@@ -19,17 +19,41 @@ app = dash.Dash(__name__)
 # Define the layout
 app.layout = html.Div(
     [
-        html.H1("Select Variables to Plot"),
-        # Checkbox for selecting variables
-        dcc.Checklist(
-            id="variable-selector",
-            options=[
-                {"label": "Population", "value": "Population"},
-                {"label": "Area", "value": "Area"},
-                {"label": "GDP", "value": "GDP"},
-            ],
-            value=["Population"],  # Default selected variable
-            inline=True,
+        html.H1("Select Variables for X and Y Axes"),
+        # Dropdown to select variables
+        html.Div(
+            [
+                html.Div(
+                    [
+                        html.Label("X Axis"),
+                        dcc.Dropdown(
+                            id="x-axis-selector",
+                            options=[
+                                {"label": col, "value": col}
+                                for col in df.columns
+                                if col != "Country"
+                            ],
+                            value="Population",  # Default value
+                        ),
+                    ],
+                    style={"width": "48%", "display": "inline-block"},
+                ),
+                html.Div(
+                    [
+                        html.Label("Y Axis"),
+                        dcc.Dropdown(
+                            id="y-axis-selector",
+                            options=[
+                                {"label": col, "value": col}
+                                for col in df.columns
+                                if col != "Country"
+                            ],
+                            value="GDP",  # Default value
+                        ),
+                    ],
+                    style={"width": "48%", "display": "inline-block"},
+                ),
+            ]
         ),
         # Graph output
         dcc.Graph(id="graph-output"),
@@ -37,15 +61,19 @@ app.layout = html.Div(
 )
 
 
-# Callback to update graph based on selected variables
-@app.callback(Output("graph-output", "figure"), Input("variable-selector", "value"))
-def update_graph(selected_variables):
-    if not selected_variables:
-        return px.line(title="Select variables to visualize data")
-
-    # Create a bar chart based on selected variables
-    fig = px.bar(df, x="Country", y=selected_variables, barmode="group")
-    fig.update_layout(title="Selected Variables by Country")
+# Callback to update graph based on selected axes
+@app.callback(
+    Output("graph-output", "figure"),
+    Input("x-axis-selector", "value"),
+    Input("y-axis-selector", "value"),
+)
+def update_graph(x_axis, y_axis):
+    # Create a scatter plot based on selected axes
+    fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
+    fig.update_traces(textposition="top center")  # Show country names on the points
+    fig.update_layout(
+        title=f"{y_axis} vs {x_axis}", xaxis_title=x_axis, yaxis_title=y_axis
+    )
 
     return fig
 
