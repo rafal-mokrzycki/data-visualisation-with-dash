@@ -277,7 +277,7 @@ sidebar = [
                                 [
                                     html.Label("X Axis Scale"),
                                     dcc.Dropdown(
-                                        id="y-axis-scale",
+                                        id="x-axis-scale",
                                         options=[
                                             {"label": "Linear", "value": "linear"},
                                             {"label": "Logarithmic", "value": "log"},
@@ -297,7 +297,7 @@ sidebar = [
                                 [
                                     html.Label("Y Axis Scale"),
                                     dcc.Dropdown(
-                                        id="x-axis-scale",
+                                        id="y-axis-scale",
                                         options=[
                                             {"label": "Linear", "value": "linear"},
                                             {"label": "Logarithmic", "value": "log"},
