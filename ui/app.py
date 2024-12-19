@@ -35,6 +35,15 @@ app.layout = html.Div(
                             ],
                             value="Population",  # Default value
                         ),
+                        dcc.RadioItems(
+                            id="x-axis-scale",
+                            options=[
+                                {"label": "Linear", "value": "linear"},
+                                {"label": "Logarithmic", "value": "log"},
+                            ],
+                            value="linear",  # Default scale
+                            labelStyle={"display": "inline-block"},
+                        ),
                     ],
                     style={"width": "48%", "display": "inline-block"},
                 ),
@@ -50,6 +59,15 @@ app.layout = html.Div(
                             ],
                             value="GDP",  # Default value
                         ),
+                        dcc.RadioItems(
+                            id="y-axis-scale",
+                            options=[
+                                {"label": "Linear", "value": "linear"},
+                                {"label": "Logarithmic", "value": "log"},
+                            ],
+                            value="linear",  # Default scale
+                            labelStyle={"display": "inline-block"},
+                        ),
                     ],
                     style={"width": "48%", "display": "inline-block"},
                 ),
@@ -61,13 +79,15 @@ app.layout = html.Div(
 )
 
 
-# Callback to update graph based on selected axes
+# Callback to update graph based on selected axes and scales
 @app.callback(
     Output("graph-output", "figure"),
     Input("x-axis-selector", "value"),
     Input("y-axis-selector", "value"),
+    Input("x-axis-scale", "value"),
+    Input("y-axis-scale", "value"),
 )
-def update_graph(x_axis, y_axis):
+def update_graph(x_axis, y_axis, x_scale, y_scale):
     # Check if the X axis is set to 'Country'
     if x_axis == "Country":
         # Create a bar plot if 'Country' is selected for the X axis
@@ -79,6 +99,11 @@ def update_graph(x_axis, y_axis):
         # Create a scatter plot for other selections
         fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
         fig.update_traces(textposition="top center")  # Show country names on the points
+
+        # Update axis scales for scatter plot based on user selection
+        fig.update_xaxes(type=x_scale)
+        fig.update_yaxes(type=y_scale)
+
         fig.update_layout(
             title=f"{y_axis} vs {x_axis}", xaxis_title=x_axis, yaxis_title=y_axis
         )
