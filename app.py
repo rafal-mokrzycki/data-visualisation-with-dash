@@ -210,11 +210,16 @@ sidebar = [
             dbc.CardHeader("Tools"),
             dbc.CardBody(
                 [
-                    # Title for selecting variables
-                    html.H5("Select variables", className="card-title"),
+                    # Title for selecting variables with spacing
+                    html.H5(
+                        "Select variables",
+                        className="card-title",
+                        style={"marginBottom": "20px", "marginTop": "20px"},
+                    ),  # More space before and after
                     # Dropdown to select variables
                     html.Div(
                         [
+                            # Dropdown to select X variable
                             html.Div(
                                 [
                                     html.Label("X Axis"),
@@ -227,8 +232,14 @@ sidebar = [
                                         value="Population",  # Default value
                                     ),
                                 ],
-                                style={"width": "48%", "display": "inline-block"},
+                                style={
+                                    "width": "48%",
+                                    "display": "inline-block",
+                                    "marginRight": "10px",
+                                    "float": "left",
+                                },  # More space between dropdowns
                             ),
+                            # Dropdown to select Y variable
                             html.Div(
                                 [
                                     html.Label("Y Axis"),
@@ -242,37 +253,74 @@ sidebar = [
                                         value="GDP",  # Default value
                                     ),
                                 ],
-                                style={"width": "48%", "display": "inline-block"},
+                                style={
+                                    "width": "48%",
+                                    "display": "inline-block",
+                                },  # More space between dropdowns
                             ),
-                        ]
+                        ],
+                        style={
+                            "display": "inline",
+                        },
                     ),
-                    # Title for selecting scale
-                    html.H5("Select scale", className="card-title"),
-                    # Radio items for X and Y axis scale
+                    # Title for selecting scale with spacing
+                    html.H5(
+                        "Select scale",
+                        className="card-title",
+                        style={"marginBottom": "20px", "marginTop": "20px"},
+                    ),  # More space before and after
+                    # Dropdown for selecting X axis scale
                     html.Div(
                         [
-                            dcc.RadioItems(
-                                id="x-axis-scale",
-                                options=[
-                                    {"label": "Linear", "value": "linear"},
-                                    {"label": "Logarithmic", "value": "log"},
+                            # Dropdown for selecting X axis scale
+                            html.Div(
+                                [
+                                    html.Label("X Axis Scale"),
+                                    dcc.Dropdown(
+                                        id="y-axis-scale",
+                                        options=[
+                                            {"label": "Linear", "value": "linear"},
+                                            {"label": "Logarithmic", "value": "log"},
+                                        ],
+                                        value="linear",  # Default scale
+                                    ),
                                 ],
-                                value="linear",  # Default scale
-                                labelStyle={"display": "inline-block"},
+                                style={
+                                    "width": "48%",
+                                    "display": "inline-block",
+                                    "marginRight": "10px",
+                                    "float": "left",
+                                },
                             ),
-                            dcc.RadioItems(
-                                id="y-axis-scale",
-                                options=[
-                                    {"label": "Linear", "value": "linear"},
-                                    {"label": "Logarithmic", "value": "log"},
+                            # Dropdown for selecting Y axis scale
+                            html.Div(
+                                [
+                                    html.Label("Y Axis Scale"),
+                                    dcc.Dropdown(
+                                        id="x-axis-scale",
+                                        options=[
+                                            {"label": "Linear", "value": "linear"},
+                                            {"label": "Logarithmic", "value": "log"},
+                                        ],
+                                        value="linear",  # Default scale
+                                    ),
                                 ],
-                                value="linear",  # Default scale
-                                labelStyle={"display": "inline-block"},
+                                style={
+                                    "width": "48%",
+                                    "display": "inline-block",
+                                },
                             ),
-                        ]
+                        ],
+                        style={
+                            "display": "inline",
+                        },
                     ),
-                    # Title for selecting color theme
-                    html.H5("Select color theme", className="card-title"),
+                    # Title for selecting color theme with spacing
+                    html.H5(
+                        "Select color theme",
+                        className="card-title",
+                        style={"marginBottom": "20px", "marginTop": "20px"},
+                    ),  # More space before and after
                     # Dropdown for selecting the plot color theme
                     dcc.Dropdown(
                         id="color-theme-selector",
@@ -289,6 +337,9 @@ sidebar = [
                             ]
                         ],
                         value="plotly",  # Default value
+                        style={
+                            "marginBottom": "20px"
+                        },  # Space below color theme dropdown
                     ),
                 ]
             ),
@@ -332,16 +383,16 @@ app.layout = html.Div(
 
 
 # Callback to update Y axis scale options based on selected X axis
-@app.callback(
-    Output("x-axis-scale", "style"),
-    Input("x-axis-selector", "value"),
-)
-def update_x_axis_scale_style(x_axis):
-    if x_axis == "Country":
-        return {
-            "display": "none"
-        }  # Hide the X axis scale switch if Country is selected
-    return {"display": "inline-block"}  # Show it otherwise
+# @app.callback(
+#     Output("x-axis-scale", "style"),
+#     Input("x-axis-selector", "value"),
+# )
+# def update_x_axis_scale_style(x_axis):
+#     if x_axis == "Country":
+#         return {
+#             "display": "none"
+#         }  # Hide the X axis scale switch if Country is selected
+#     return {"display": "inline-block"}  # Show it otherwise
 
 
 # Callback to update graph based on selected axes and scales
