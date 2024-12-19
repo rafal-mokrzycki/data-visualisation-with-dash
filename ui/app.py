@@ -1,7 +1,7 @@
 import dash
 import pandas as pd
 import plotly.express as px
-from dash import Input, Output, State, dcc, html
+from dash import Input, Output, dcc, html
 
 # Sample data
 df = pd.DataFrame(
@@ -31,7 +31,7 @@ app.layout = html.Div(
                             options=[
                                 {"label": col, "value": col}
                                 for col in df.columns
-                                if col != "Country"
+                                # if col != "Country"
                             ],
                             value="Population",  # Default value
                         ),
@@ -68,12 +68,20 @@ app.layout = html.Div(
     Input("y-axis-selector", "value"),
 )
 def update_graph(x_axis, y_axis):
-    # Create a scatter plot based on selected axes
-    fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
-    fig.update_traces(textposition="top center")  # Show country names on the points
-    fig.update_layout(
-        title=f"{y_axis} vs {x_axis}", xaxis_title=x_axis, yaxis_title=y_axis
-    )
+    # Check if the X axis is set to 'Country'
+    if x_axis == "Country":
+        # Create a bar plot if 'Country' is selected for the X axis
+        fig = px.bar(df, x="Country", y=y_axis)
+        fig.update_layout(
+            title=f"{y_axis} by Country", xaxis_title="Country", yaxis_title=y_axis
+        )
+    else:
+        # Create a scatter plot for other selections
+        fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
+        fig.update_traces(textposition="top center")  # Show country names on the points
+        fig.update_layout(
+            title=f"{y_axis} vs {x_axis}", xaxis_title=x_axis, yaxis_title=y_axis
+        )
 
     return fig
 
