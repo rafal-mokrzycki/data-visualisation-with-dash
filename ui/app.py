@@ -1,7 +1,9 @@
 import dash
+import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 from dash import Input, Output, dcc, html
+from dash.dependencies import Input, Output
 
 # Sample data
 df = pd.DataFrame(
@@ -12,69 +14,311 @@ df = pd.DataFrame(
         "GDP": [21137518, 1848270, 3845630, 2825208, 2715518],
     }
 )
+external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
 
 # Initialize the Dash app with suppress_callback_exceptions
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
+app = dash.Dash(
+    __name__,
+    suppress_callback_exceptions=True,
+    external_stylesheets=external_stylesheets,
+)
 
-# Define the layout
+# Modal
+with open("EXPLANATIONS.md", "r") as f:
+    howto_md = f.read()
+
+modal_overlay = dbc.Modal(
+    [
+        dbc.ModalBody(html.Div([dcc.Markdown(howto_md)], id="howto-md")),
+        dbc.ModalFooter(dbc.Button("Close", id="howto-close", className="howto-bn")),
+    ],
+    id="modal",
+    size="lg",
+)
+button_howto = dbc.Button(
+    "Learn more",
+    id="howto-open",
+    outline=True,
+    color="info",
+    # Turn off lowercase transformation for class .button in stylesheet
+    style={"textTransform": "none"},
+)
+
+button_github = dbc.Button(
+    "View Code on github",
+    outline=True,
+    color="primary",
+    href="https://github.com/rafal-mokrzycki/dash-pandas/",
+    id="gh-link",
+    style={"text-transform": "none"},
+)
+
+
+# Header
+header = dbc.Navbar(
+    dbc.Container(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.Img(
+                            id="logo",
+                            src=app.get_asset_url("dash-logo-new.png"),
+                            height="30px",
+                        ),
+                        md="auto",
+                    ),
+                    dbc.Col(
+                        [
+                            html.Div(
+                                [
+                                    html.H3("Interactive Plots"),
+                                    html.P("Economic data"),
+                                ],
+                                id="app-title",
+                            )
+                        ],
+                        md=True,
+                        align="center",
+                    ),
+                ],
+                align="center",
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dbc.NavbarToggler(id="navbar-toggler"),
+                            dbc.Collapse(
+                                dbc.Nav(
+                                    [
+                                        dbc.NavItem(button_howto),
+                                        dbc.NavItem(button_github),
+                                    ],
+                                    navbar=True,
+                                ),
+                                id="navbar-collapse",
+                                navbar=True,
+                            ),
+                            modal_overlay,
+                        ],
+                        md=2,
+                    ),
+                ],
+                align="center",
+            ),
+        ],
+        fluid=True,
+    ),
+    dark=True,
+    color="dark",
+    sticky="top",
+)
+
+# Description
+description = dbc.Col(
+    [
+        dbc.Card(
+            id="description-card",
+            children=[
+                dbc.CardHeader("Explanation"),
+                dbc.CardBody(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    [
+                                        html.Img(
+                                            src="assets/economic_data_img_example.png",
+                                            width="200px",
+                                        )
+                                    ],
+                                    md="auto",
+                                ),
+                                dbc.Col(
+                                    html.P(
+                                        "This is an example of interactive economic data plotter. "
+                                        " "
+                                    ),
+                                    md=True,
+                                ),
+                            ]
+                        ),
+                    ]
+                ),
+            ],
+        )
+    ],
+    md=12,
+)
+
+# Data Plotting
+plotting = [
+    dbc.Card(
+        id="plotting-card",
+        children=[
+            dbc.CardHeader("Viewer"),
+            dbc.CardBody(
+                [
+                    # Wrap dcc.Loading in a div to force transparency when loading
+                    html.Div(
+                        [
+                            html.H1("Select Variables for X and Y Axes"),
+                            # Graph output
+                            dcc.Graph(id="graph-output"),
+                        ]
+                    ),
+                ]
+            ),
+            dbc.CardFooter(
+                [
+                    # Download links
+                    # html.A(
+                    #     id="download",
+                    #     download="classifier.json",
+                    # ),
+                    html.Div(
+                        children=[
+                            dbc.ButtonGroup(
+                                [
+                                    dbc.Button(
+                                        "Download plot",
+                                        id="download-button",
+                                        outline=True,
+                                    ),
+                                ],
+                                size="lg",
+                                style={"width": "100%"},
+                            ),
+                        ],
+                    ),
+                    html.A(
+                        id="download-plot",
+                        download="plot.png",
+                    ),
+                ]
+            ),
+        ],
+    )
+]
+
+# Sidebar
+sidebar = [
+    dbc.Card(
+        id="sidebar-card",
+        children=[
+            dbc.CardHeader("Tools"),
+            dbc.CardBody(
+                [
+                    # Dropdown to select variables
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Label("X Axis"),
+                                    dcc.Dropdown(
+                                        id="x-axis-selector",
+                                        options=[
+                                            {"label": col, "value": col}
+                                            for col in df.columns
+                                        ],
+                                        value="Population",  # Default value
+                                    ),
+                                    # Radio items for X axis scale (conditionally rendered)
+                                    dcc.RadioItems(
+                                        id="x-axis-scale",
+                                        options=[
+                                            {
+                                                "label": "Linear",
+                                                "value": "linear",
+                                            },
+                                            {
+                                                "label": "Logarithmic",
+                                                "value": "log",
+                                            },
+                                        ],
+                                        value="linear",  # Default scale
+                                        labelStyle={"display": "inline-block"},
+                                    ),
+                                ],
+                                style={
+                                    "width": "48%",
+                                    "display": "inline-block",
+                                },
+                            ),
+                            html.Div(
+                                [
+                                    html.Label("Y Axis"),
+                                    dcc.Dropdown(
+                                        id="y-axis-selector",
+                                        options=[
+                                            {"label": col, "value": col}
+                                            for col in df.columns
+                                            if col != "Country"
+                                        ],
+                                        value="GDP",  # Default value
+                                    ),
+                                    # Radio items for Y axis scale
+                                    dcc.RadioItems(
+                                        id="y-axis-scale",
+                                        options=[
+                                            {
+                                                "label": "Linear",
+                                                "value": "linear",
+                                            },
+                                            {
+                                                "label": "Logarithmic",
+                                                "value": "log",
+                                            },
+                                        ],
+                                        value="linear",  # Default scale
+                                        labelStyle={"display": "inline-block"},
+                                    ),
+                                ],
+                                style={
+                                    "width": "48%",
+                                    "display": "inline-block",
+                                },
+                            ),
+                        ]
+                    ),
+                ]
+            ),
+        ],
+    ),
+]
+
+# Meta
+meta = [
+    html.Div(
+        id="no-display",
+        children=[
+            # Store for user created masks
+            # data is a list of dicts describing shapes
+            dcc.Store(id="masks", data={"shapes": []}),
+            dcc.Store(id="classifier-store", data={}),
+            dcc.Store(id="classified-image-store", data=""),
+            dcc.Store(id="features_hash", data=""),
+        ],
+    ),
+    html.Div(id="download-dummy"),
+    html.Div(id="download-image-dummy"),
+]
+
 app.layout = html.Div(
     [
-        html.H1("Select Variables for X and Y Axes"),
-        # Dropdown to select variables
-        html.Div(
+        header,
+        dbc.Container(
             [
-                html.Div(
-                    [
-                        html.Label("X Axis"),
-                        dcc.Dropdown(
-                            id="x-axis-selector",
-                            options=[
-                                {"label": col, "value": col} for col in df.columns
-                            ],
-                            value="Population",  # Default value
-                        ),
-                        # Radio items for X axis scale (conditionally rendered)
-                        dcc.RadioItems(
-                            id="x-axis-scale",
-                            options=[
-                                {"label": "Linear", "value": "linear"},
-                                {"label": "Logarithmic", "value": "log"},
-                            ],
-                            value="linear",  # Default scale
-                            labelStyle={"display": "inline-block"},
-                        ),
-                    ],
-                    style={"width": "48%", "display": "inline-block"},
+                dbc.Row(description),
+                dbc.Row(
+                    id="app-content",
+                    children=[dbc.Col(plotting, md=8), dbc.Col(sidebar, md=4)],
                 ),
-                html.Div(
-                    [
-                        html.Label("Y Axis"),
-                        dcc.Dropdown(
-                            id="y-axis-selector",
-                            options=[
-                                {"label": col, "value": col}
-                                for col in df.columns
-                                if col != "Country"
-                            ],
-                            value="GDP",  # Default value
-                        ),
-                        # Radio items for Y axis scale
-                        dcc.RadioItems(
-                            id="y-axis-scale",
-                            options=[
-                                {"label": "Linear", "value": "linear"},
-                                {"label": "Logarithmic", "value": "log"},
-                            ],
-                            value="linear",  # Default scale
-                            labelStyle={"display": "inline-block"},
-                        ),
-                    ],
-                    style={"width": "48%", "display": "inline-block"},
-                ),
-            ]
+                dbc.Row(dbc.Col(meta)),
+            ],
+            fluid=True,
         ),
-        # Graph output
-        dcc.Graph(id="graph-output"),
     ]
 )
 
