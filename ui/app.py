@@ -33,6 +33,7 @@ app.layout = html.Div(
                             ],
                             value="Population",  # Default value
                         ),
+                        # Radio items for X axis scale (conditionally rendered)
                         dcc.RadioItems(
                             id="x-axis-scale",
                             options=[
@@ -57,7 +58,7 @@ app.layout = html.Div(
                             ],
                             value="GDP",  # Default value
                         ),
-                        # Move Y axis scale switch directly below the Y axis dropdown
+                        # Radio items for Y axis scale
                         dcc.RadioItems(
                             id="y-axis-scale",
                             options=[
@@ -76,6 +77,19 @@ app.layout = html.Div(
         dcc.Graph(id="graph-output"),
     ]
 )
+
+
+# Callback to update Y axis scale options based on selected X axis
+@app.callback(
+    Output("x-axis-scale", "style"),
+    Input("x-axis-selector", "value"),
+)
+def update_x_axis_scale_style(x_axis):
+    if x_axis == "Country":
+        return {
+            "display": "none"
+        }  # Hide the X axis scale switch if Country is selected
+    return {"display": "inline-block"}  # Show it otherwise
 
 
 # Callback to update graph based on selected axes and scales
