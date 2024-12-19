@@ -2,7 +2,9 @@ import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-from dash import dcc, html
+import plotly.graph_objects as go
+from dash import ctx, dcc, html
+from dash.dcc import Download
 from dash.dependencies import Input, Output
 
 # Sample data
@@ -403,6 +405,7 @@ app.layout = html.Div(
     Input("x-axis-scale", "value"),
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),  # New input for color theme
+    # Input("download-button", "n_clicks"),
 )
 def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
     # Check if the X axis is set to 'Country'
@@ -436,6 +439,31 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
             template=color_theme,  # Apply color theme
         )
 
+    return fig
+
+
+@app.callback(
+    Output("download-plot", "data"),  # This is where the download data will go
+    [Input("download-button", "n_clicks")],
+)
+def get_image(download):
+    # We want to trigger a download action only if the download button is clicked
+    if ctx.triggered and ctx.triggered_id == "download-button":
+        return dcc.send_data_frame(
+            get_plot(),  # Function to get the plot image
+            "plot.png",  # Name of the file to download
+        )
+    return None
+
+
+def get_plot():
+    """
+    Function to generate the plotly plot.
+    Replace this with your existing graph logic.
+    """
+    # Sample plot (this can be your graph logic)
+    fig = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[4, 5, 6])])
+    fig.update_layout(title="Example Plot")
     return fig
 
 
