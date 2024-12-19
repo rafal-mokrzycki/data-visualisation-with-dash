@@ -2,7 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-from dash import Input, Output, dcc, html
+from dash import dcc, html
 from dash.dependencies import Input, Output
 
 # Sample data
@@ -163,7 +163,7 @@ plotting = [
                     # Wrap dcc.Loading in a div to force transparency when loading
                     html.Div(
                         [
-                            html.H1("Select Variables for X and Y Axes"),
+                            # html.H1("Select Variables for X and Y Axes"),
                             # Graph output
                             dcc.Graph(id="graph-output"),
                         ]
@@ -210,6 +210,8 @@ sidebar = [
             dbc.CardHeader("Tools"),
             dbc.CardBody(
                 [
+                    # Title for selecting variables
+                    html.H5("Select variables", className="card-title"),
                     # Dropdown to select variables
                     html.Div(
                         [
@@ -224,27 +226,8 @@ sidebar = [
                                         ],
                                         value="Population",  # Default value
                                     ),
-                                    # Radio items for X axis scale (conditionally rendered)
-                                    dcc.RadioItems(
-                                        id="x-axis-scale",
-                                        options=[
-                                            {
-                                                "label": "Linear",
-                                                "value": "linear",
-                                            },
-                                            {
-                                                "label": "Logarithmic",
-                                                "value": "log",
-                                            },
-                                        ],
-                                        value="linear",  # Default scale
-                                        labelStyle={"display": "inline-block"},
-                                    ),
                                 ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                },
+                                style={"width": "48%", "display": "inline-block"},
                             ),
                             html.Div(
                                 [
@@ -258,29 +241,54 @@ sidebar = [
                                         ],
                                         value="GDP",  # Default value
                                     ),
-                                    # Radio items for Y axis scale
-                                    dcc.RadioItems(
-                                        id="y-axis-scale",
-                                        options=[
-                                            {
-                                                "label": "Linear",
-                                                "value": "linear",
-                                            },
-                                            {
-                                                "label": "Logarithmic",
-                                                "value": "log",
-                                            },
-                                        ],
-                                        value="linear",  # Default scale
-                                        labelStyle={"display": "inline-block"},
-                                    ),
                                 ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                },
+                                style={"width": "48%", "display": "inline-block"},
                             ),
                         ]
+                    ),
+                    # Title for selecting scale
+                    html.H5("Select scale", className="card-title"),
+                    # Radio items for X and Y axis scale
+                    html.Div(
+                        [
+                            dcc.RadioItems(
+                                id="x-axis-scale",
+                                options=[
+                                    {"label": "Linear", "value": "linear"},
+                                    {"label": "Logarithmic", "value": "log"},
+                                ],
+                                value="linear",  # Default scale
+                                labelStyle={"display": "inline-block"},
+                            ),
+                            dcc.RadioItems(
+                                id="y-axis-scale",
+                                options=[
+                                    {"label": "Linear", "value": "linear"},
+                                    {"label": "Logarithmic", "value": "log"},
+                                ],
+                                value="linear",  # Default scale
+                                labelStyle={"display": "inline-block"},
+                            ),
+                        ]
+                    ),
+                    # Title for selecting color theme
+                    html.H5("Select color theme", className="card-title"),
+                    # Dropdown for selecting the plot color theme
+                    dcc.Dropdown(
+                        id="color-theme-selector",
+                        options=[
+                            {"label": theme, "value": theme}
+                            for theme in [
+                                "plotly",
+                                "plotly_white",
+                                "plotly_dark",
+                                "ggplot2",
+                                "seaborn",
+                                "simple_white",
+                                "none",
+                            ]
+                        ],
+                        value="plotly",  # Default value
                     ),
                 ]
             ),
@@ -343,8 +351,9 @@ def update_x_axis_scale_style(x_axis):
     Input("y-axis-selector", "value"),
     Input("x-axis-scale", "value"),
     Input("y-axis-scale", "value"),
+    Input("color-theme-selector", "value"),  # New input for color theme
 )
-def update_graph(x_axis, y_axis, x_scale, y_scale):
+def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
     # Check if the X axis is set to 'Country'
     if x_axis == "Country":
         # Create a bar plot if 'Country' is selected for the X axis
@@ -355,7 +364,10 @@ def update_graph(x_axis, y_axis, x_scale, y_scale):
             fig.update_yaxes(type="log")
 
         fig.update_layout(
-            title=f"{y_axis} by Country", xaxis_title="Country", yaxis_title=y_axis
+            title=f"{y_axis} by Country",
+            xaxis_title="Country",
+            yaxis_title=y_axis,
+            template=color_theme,  # Apply color theme
         )
     else:
         # Create a scatter plot for other selections
@@ -367,7 +379,10 @@ def update_graph(x_axis, y_axis, x_scale, y_scale):
         fig.update_yaxes(type=y_scale)
 
         fig.update_layout(
-            title=f"{y_axis} vs {x_axis}", xaxis_title=x_axis, yaxis_title=y_axis
+            title=f"{y_axis} vs {x_axis}",
+            xaxis_title=x_axis,
+            yaxis_title=y_axis,
+            template=color_theme,  # Apply color theme
         )
 
     return fig
