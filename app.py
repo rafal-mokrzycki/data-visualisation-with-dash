@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 
 from data.london_houses import get_data
 
-df, _, num_colnames = get_data()
+df, cat_columns = get_data()
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
 
@@ -247,7 +247,7 @@ sidebar = [
                                         options=[
                                             {"label": col, "value": col}
                                             for col in df.columns
-                                            if col in num_colnames
+                                            if col not in cat_columns
                                         ],
                                         value="price",  # Default value
                                     ),
@@ -391,18 +391,20 @@ def update_x_axis_scale_style(x_axis):
     Input("color-theme-selector", "value"),
 )
 def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
-    if x_axis == "city":
-        fig = px.bar(df, x="city", y=y_axis)
+    if x_axis in cat_columns:
+        df_count = df[x_axis].value_counts().reset_index()
+        df_count.columns = [x_axis, "count"]
+        fig = px.bar(df_count, x=x_axis, y="count")
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"{y_axis} by city",
-            xaxis_title="city",
-            yaxis_title=y_axis,
+            title=f"count by {x_axis}",
+            xaxis_title=x_axis,
+            yaxis_title="count",
             template=color_theme,
         )
     else:
-        fig = px.scatter(df, x=x_axis, y=y_axis, text="city")
+        fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
         fig.update_traces(textposition="top center")
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
