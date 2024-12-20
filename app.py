@@ -173,11 +173,56 @@ plotting = [
             ),
             dbc.CardFooter(
                 [
-                    dbc.Button("Download as JPG", id="download-jpg", outline=True),
-                    dbc.Button("Download as PNG", id="download-png", outline=True),
-                    dbc.Button("Download as SVG", id="download-svg", outline=True),
+                    html.H5(
+                        "Download as:",
+                        className="card-title",
+                        style={"marginBottom": "10px", "marginTop": "10px"},
+                    ),
+                    dbc.Button(
+                        "JPG",
+                        id="download-jpg",
+                        outline=True,
+                        style={
+                            "border-style": "solid",
+                            "border-color": "black",
+                            "width": "10%",
+                            "display": "inline-block",
+                            "marginRight": "10px",
+                            "float": "left",
+                        },
+                    ),
+                    dbc.Button(
+                        "PNG",
+                        id="download-png",
+                        outline=True,
+                        # className="download-button",
+                        style={
+                            "border-style": "solid",
+                            "border-color": "black",
+                            "width": "10%",
+                            "display": "inline-block",
+                            "marginRight": "10px",
+                            "float": "left",
+                        },
+                    ),
+                    dbc.Button(
+                        "SVG",
+                        id="download-svg",
+                        outline=True,
+                        style={
+                            "border-style": "solid",
+                            "border-color": "black",
+                            "width": "10%",
+                            "display": "inline-block",
+                            "marginRight": "10px",
+                            "float": "left",
+                        },
+                    ),
                     dcc.Download(id="download-image"),
-                ]
+                ],
+                style={
+                    "display": "inline",
+                },
             ),
         ],
     )
