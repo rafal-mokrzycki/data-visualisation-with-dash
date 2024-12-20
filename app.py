@@ -1,9 +1,12 @@
+import json
+
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from dash import dcc, html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 # Sample data
 df = pd.DataFrame(
@@ -163,31 +166,17 @@ plotting = [
                         [
                             # Graph output
                             dcc.Graph(id="graph-output"),
+                            dcc.Store(id="stored-figure"),
                         ]
                     ),
                 ]
             ),
             dbc.CardFooter(
                 [
-                    html.Div(
-                        children=[
-                            dbc.ButtonGroup(
-                                [
-                                    dbc.Button(
-                                        "Download as JPG",
-                                        id="download-image",
-                                        outline=True,
-                                    ),
-                                ],
-                                size="lg",
-                                style={"width": "100%"},
-                            ),
-                        ],
-                    ),
-                    html.A(
-                        id="download-image",
-                        download="plot.png",
-                    ),
+                    dbc.Button("Download as JPG", id="download-jpg", outline=True),
+                    dbc.Button("Download as PNG", id="download-png", outline=True),
+                    dbc.Button("Download as SVG", id="download-svg", outline=True),
+                    dcc.Download(id="download-image"),
                 ]
             ),
         ],
@@ -373,9 +362,10 @@ def update_x_axis_scale_style(x_axis):
     ], False  # Show it otherwise
 
 
-# Callback to update graph based on selected axes and scales
+# Callback to update graph and store its figure data
 @app.callback(
     Output("graph-output", "figure"),
+    Output("stored-figure", "data"),  # Store figure data in JSON format
     Input("x-axis-selector", "value"),
     Input("y-axis-selector", "value"),
     Input("x-axis-scale", "value"),
@@ -383,15 +373,10 @@ def update_x_axis_scale_style(x_axis):
     Input("color-theme-selector", "value"),
 )
 def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
-    # Check if the X axis is set to 'Country'
     if x_axis == "Country":
-        # Create a bar plot if 'Country' is selected for the X axis
         fig = px.bar(df, x="Country", y=y_axis)
-
-        # Update Y axis scale for bar plot based on user selection
         if y_scale == "log":
             fig.update_yaxes(type="log")
-
         fig.update_layout(
             title=f"{y_axis} by Country",
             xaxis_title="Country",
@@ -399,14 +384,10 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
             template=color_theme,
         )
     else:
-        # Create a scatter plot for other selections
         fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
         fig.update_traces(textposition="top center")
-
-        # Update axis scales for scatter plot based on user selection
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
-
         fig.update_layout(
             title=f"{y_axis} vs {x_axis}",
             xaxis_title=x_axis,
@@ -414,9 +395,43 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
             template=color_theme,
         )
 
-    return fig
+    return fig, fig.to_json()  # Store figure as JSON
+
+
+# Callback to handle download requests using stored figure data
+@app.callback(
+    Output("download-image", "data"),
+    Input("download-jpg", "n_clicks"),
+    Input("download-png", "n_clicks"),
+    Input("download-svg", "n_clicks"),
+    State("stored-figure", "data"),  # Get stored figure data
+    prevent_initial_call=True,
+)
+def download_image(jpg_clicks, png_clicks, svg_clicks, stored_figure):
+    if not stored_figure:
+        return
+
+    # Load the figure from JSON using plotly.graph_objects
+    fig_dict = json.loads(stored_figure)  # Convert JSON string back to dictionary
+    fig = go.Figure(fig_dict)  # Create a Figure object from the dictionary
+
+    # Determine which button was clicked and save accordingly
+    file_path = ""
+
+    if jpg_clicks:
+        file_path = "output_image.jpg"
+        fig.write_image(file_path)  # Save as JPG
+        return dcc.send_file(file_path)  # Send file for download
+    elif png_clicks:
+        file_path = "output_image.png"
+        fig.write_image(file_path)  # Save as PNG
+        return dcc.send_file(file_path)  # Send file for download
+    elif svg_clicks:
+        file_path = "output_image.svg"
+        fig.write_image(file_path)  # Save as SVG
+        return dcc.send_file(file_path)  # Send file for download
 
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8080)
