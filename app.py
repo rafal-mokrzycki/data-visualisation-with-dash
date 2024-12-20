@@ -8,15 +8,10 @@ import plotly.graph_objects as go
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
-# Sample data
-df = pd.DataFrame(
-    {
-        "Country": ["USA", "Canada", "Germany", "UK", "France"],
-        "Population": [331, 38, 83, 67, 65],
-        "Area": [9833517, 9984670, 357022, 243610, 551695],
-        "GDP": [21137518, 1848270, 3845630, 2825208, 2715518],
-    }
-)
+from data.london_houses import get_data
+
+df = get_data()
+
 external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
 
 # Initialize the Dash app with suppress_callback_exceptions
@@ -234,7 +229,7 @@ sidebar = [
                                             {"label": col, "value": col}
                                             for col in df.columns
                                         ],
-                                        value="Population",  # Default value
+                                        value="sqft",  # Default value
                                     ),
                                 ],
                                 style={
@@ -253,9 +248,9 @@ sidebar = [
                                         options=[
                                             {"label": col, "value": col}
                                             for col in df.columns
-                                            if col != "Country"
+                                            if col != "city"
                                         ],
-                                        value="GDP",  # Default value
+                                        value="bedrooms",  # Default value
                                     ),
                                 ],
                                 style={
@@ -376,10 +371,10 @@ app.layout = html.Div(
     Input("x-axis-selector", "value"),
 )
 def update_x_axis_scale_style(x_axis):
-    if x_axis == "Country":
+    if x_axis == "city":
         return [
             {"label": "", "value": "linear"},
-        ], True  # Hide the X axis scale switch if Country is selected
+        ], True  # Hide the X axis scale switch if city is selected
     return [
         {"label": "Linear", "value": "linear"},
         {"label": "Logarithmic", "value": "log"},
@@ -397,18 +392,18 @@ def update_x_axis_scale_style(x_axis):
     Input("color-theme-selector", "value"),
 )
 def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
-    if x_axis == "Country":
-        fig = px.bar(df, x="Country", y=y_axis)
+    if x_axis == "city":
+        fig = px.bar(df, x="city", y=y_axis)
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"{y_axis} by Country",
-            xaxis_title="Country",
+            title=f"{y_axis} by city",
+            xaxis_title="city",
             yaxis_title=y_axis,
             template=color_theme,
         )
     else:
-        fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
+        fig = px.scatter(df, x=x_axis, y=y_axis, text="city")
         fig.update_traces(textposition="top center")
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
