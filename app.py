@@ -37,6 +37,7 @@ modal_overlay = dbc.Modal(
     id="modal",
     size="lg",
 )
+
 button_howto = dbc.Button(
     "Learn more",
     id="howto-open",
@@ -453,6 +454,30 @@ def download_image(jpg_clicks, png_clicks, svg_clicks, stored_figure):
         file_path = "output_image.svg"
         fig.write_image(file_path)  # Save as SVG
         return dcc.send_file(file_path)  # Send file for download
+
+
+# Callback for modal popup
+@app.callback(
+    Output("modal", "is_open"),
+    [Input("howto-open", "n_clicks"), Input("howto-close", "n_clicks")],
+    [State("modal", "is_open")],
+)
+def toggle_modal(n1, n2, is_open):
+    if n1 or n2:
+        return not is_open
+    return is_open
+
+
+# we use a callback to toggle the collapse on small screens
+@app.callback(
+    Output("navbar-collapse", "is_open"),
+    [Input("navbar-toggler", "n_clicks")],
+    [State("navbar-collapse", "is_open")],
+)
+def toggle_navbar_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 
 # Run the app
