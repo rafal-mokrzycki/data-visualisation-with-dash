@@ -275,6 +275,7 @@ sidebar = [
                                             {"label": "Logarithmic", "value": "log"},
                                         ],
                                         value="linear",  # Default scale
+                                        disabled=False,
                                     ),
                                 ],
                                 style={
@@ -356,16 +357,20 @@ app.layout = html.Div(
 
 
 # Callback to update Y axis scale options based on selected X axis
-# @app.callback(
-#     Output("x-axis-scale", "style"),
-#     Input("x-axis-selector", "value"),
-# )
-# def update_x_axis_scale_style(x_axis):
-#     if x_axis == "Country":
-#         return {
-#             "display": "none"
-#         }  # Hide the X axis scale switch if Country is selected
-#     return {"display": "inline-block"}  # Show it otherwise
+@app.callback(
+    Output("x-axis-scale", "options"),
+    Output("x-axis-scale", "disabled"),
+    Input("x-axis-selector", "value"),
+)
+def update_x_axis_scale_style(x_axis):
+    if x_axis == "Country":
+        return [
+            {"label": "", "value": "linear"},
+        ], True  # Hide the X axis scale switch if Country is selected
+    return [
+        {"label": "Linear", "value": "linear"},
+        {"label": "Logarithmic", "value": "log"},
+    ], False  # Show it otherwise
 
 
 # Callback to update graph based on selected axes and scales
