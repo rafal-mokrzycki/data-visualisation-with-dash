@@ -370,13 +370,29 @@ app.layout = html.Div(
     Input("x-axis-selector", "value"),
 )
 def update_x_axis_scale_style(x_axis):
-    if x_axis == "city":
+    if x_axis in cat_columns:
         return [
             {"label": "", "value": "linear"},
         ], True  # Hide the X axis scale switch if city is selected
     return [
         {"label": "Linear", "value": "linear"},
         {"label": "Logarithmic", "value": "log"},
+    ], False  # Show it otherwise
+
+
+# Callback to update Y axis scale options based on selected X axis
+@app.callback(
+    Output("y-axis-selector", "options"),
+    Output("y-axis-selector", "disabled"),
+    Input("x-axis-selector", "value"),
+)
+def update_y_axis_variables_selection(x_axis):
+    if x_axis in cat_columns:
+        return [
+            {"label": "", "value": ""},
+        ], True  # Hide the Y axis selector
+    return [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
     ], False  # Show it otherwise
 
 
@@ -398,7 +414,7 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"count by {x_axis}",
+            title=f"count per {x_axis}",
             xaxis_title=x_axis,
             yaxis_title="count",
             template=color_theme,
@@ -409,7 +425,7 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
         fig.update_layout(
-            title=f"{y_axis} vs {x_axis}",
+            title=f"{y_axis} vs. {x_axis}",
             xaxis_title=x_axis,
             yaxis_title=y_axis,
             template=color_theme,
