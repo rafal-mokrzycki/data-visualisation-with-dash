@@ -2,9 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from dash import ctx, dcc, html
-from dash.dcc import Download
+from dash import dcc, html
 from dash.dependencies import Input, Output
 
 # Sample data
@@ -21,7 +19,6 @@ external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    suppress_callback_exceptions=True,
     external_stylesheets=external_stylesheets,
 )
 
@@ -139,7 +136,7 @@ description = dbc.Col(
                                 ),
                                 dbc.Col(
                                     html.P(
-                                        "This is an example of interactive economic data plotter. "
+                                        "This is an example of interactive economic data plotter. "  # noqa: E501
                                         " "
                                     ),
                                     md=True,
@@ -162,10 +159,8 @@ plotting = [
             dbc.CardHeader("Viewer"),
             dbc.CardBody(
                 [
-                    # Wrap dcc.Loading in a div to force transparency when loading
                     html.Div(
                         [
-                            # html.H1("Select Variables for X and Y Axes"),
                             # Graph output
                             dcc.Graph(id="graph-output"),
                         ]
@@ -174,18 +169,13 @@ plotting = [
             ),
             dbc.CardFooter(
                 [
-                    # Download links
-                    # html.A(
-                    #     id="download",
-                    #     download="classifier.json",
-                    # ),
                     html.Div(
                         children=[
                             dbc.ButtonGroup(
                                 [
                                     dbc.Button(
-                                        "Download plot",
-                                        id="download-button",
+                                        "Download as JPG",
+                                        id="download-image",
                                         outline=True,
                                     ),
                                 ],
@@ -195,7 +185,7 @@ plotting = [
                         ],
                     ),
                     html.A(
-                        id="download-plot",
+                        id="download-image",
                         download="plot.png",
                     ),
                 ]
@@ -217,7 +207,7 @@ sidebar = [
                         "Select variables",
                         className="card-title",
                         style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),  # More space before and after
+                    ),
                     # Dropdown to select variables
                     html.Div(
                         [
@@ -239,7 +229,7 @@ sidebar = [
                                     "display": "inline-block",
                                     "marginRight": "10px",
                                     "float": "left",
-                                },  # More space between dropdowns
+                                },
                             ),
                             # Dropdown to select Y variable
                             html.Div(
@@ -258,7 +248,7 @@ sidebar = [
                                 style={
                                     "width": "48%",
                                     "display": "inline-block",
-                                },  # More space between dropdowns
+                                },
                             ),
                         ],
                         style={
@@ -270,7 +260,7 @@ sidebar = [
                         "Select scale",
                         className="card-title",
                         style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),  # More space before and after
+                    ),
                     # Dropdown for selecting X axis scale
                     html.Div(
                         [
@@ -322,7 +312,7 @@ sidebar = [
                         "Select color theme",
                         className="card-title",
                         style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),  # More space before and after
+                    ),
                     # Dropdown for selecting the plot color theme
                     dcc.Dropdown(
                         id="color-theme-selector",
@@ -339,9 +329,7 @@ sidebar = [
                             ]
                         ],
                         value="plotly",  # Default value
-                        style={
-                            "marginBottom": "20px"
-                        },  # Space below color theme dropdown
+                        style={"marginBottom": "20px"},
                     ),
                 ]
             ),
@@ -349,22 +337,6 @@ sidebar = [
     ),
 ]
 
-# Meta
-meta = [
-    html.Div(
-        id="no-display",
-        children=[
-            # Store for user created masks
-            # data is a list of dicts describing shapes
-            dcc.Store(id="masks", data={"shapes": []}),
-            dcc.Store(id="classifier-store", data={}),
-            dcc.Store(id="classified-image-store", data=""),
-            dcc.Store(id="features_hash", data=""),
-        ],
-    ),
-    html.Div(id="download-dummy"),
-    html.Div(id="download-image-dummy"),
-]
 
 app.layout = html.Div(
     [
@@ -376,7 +348,6 @@ app.layout = html.Div(
                     id="app-content",
                     children=[dbc.Col(plotting, md=8), dbc.Col(sidebar, md=4)],
                 ),
-                dbc.Row(dbc.Col(meta)),
             ],
             fluid=True,
         ),
@@ -404,8 +375,7 @@ app.layout = html.Div(
     Input("y-axis-selector", "value"),
     Input("x-axis-scale", "value"),
     Input("y-axis-scale", "value"),
-    Input("color-theme-selector", "value"),  # New input for color theme
-    # Input("download-button", "n_clicks"),
+    Input("color-theme-selector", "value"),
 )
 def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
     # Check if the X axis is set to 'Country'
@@ -421,12 +391,12 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
             title=f"{y_axis} by Country",
             xaxis_title="Country",
             yaxis_title=y_axis,
-            template=color_theme,  # Apply color theme
+            template=color_theme,
         )
     else:
         # Create a scatter plot for other selections
         fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
-        fig.update_traces(textposition="top center")  # Show country names on the points
+        fig.update_traces(textposition="top center")
 
         # Update axis scales for scatter plot based on user selection
         fig.update_xaxes(type=x_scale)
@@ -436,34 +406,9 @@ def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
             title=f"{y_axis} vs {x_axis}",
             xaxis_title=x_axis,
             yaxis_title=y_axis,
-            template=color_theme,  # Apply color theme
+            template=color_theme,
         )
 
-    return fig
-
-
-@app.callback(
-    Output("download-plot", "data"),  # This is where the download data will go
-    [Input("download-button", "n_clicks")],
-)
-def get_image(download):
-    # We want to trigger a download action only if the download button is clicked
-    if ctx.triggered and ctx.triggered_id == "download-button":
-        return dcc.send_data_frame(
-            get_plot(),  # Function to get the plot image
-            "plot.png",  # Name of the file to download
-        )
-    return None
-
-
-def get_plot():
-    """
-    Function to generate the plotly plot.
-    Replace this with your existing graph logic.
-    """
-    # Sample plot (this can be your graph logic)
-    fig = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[4, 5, 6])])
-    fig.update_layout(title="Example Plot")
     return fig
 
 
