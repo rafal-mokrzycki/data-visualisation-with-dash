@@ -25,3 +25,12 @@ label {
 #transparent-loader-wrapper > div {
     visibility: visible !important;
 }
+
+.download-button {
+    border-style: solid;
+    border-color: black;
+    width: 10%;
+    display: inline-block;
+    margin-right: 10px; /* Use hyphen instead of camelCase */
+    float: left;
+}
