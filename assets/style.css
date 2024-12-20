@@ -28,9 +28,13 @@ label {
 
 .download-button {
     border-style: solid;
-    border-color: black;
+    border-color: grey;
     width: 10%;
     display: inline-block;
-    margin-right: 10px; /* Use hyphen instead of camelCase */
+    margin-right: 10px;
     float: left;
 }
+.download-button:hover {
+    background-color: grey;
+    color: white;
+  }
