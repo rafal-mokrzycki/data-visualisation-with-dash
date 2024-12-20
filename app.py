@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output, State
 
 from data.london_houses import get_data
 
-df = get_data()
+df, _, num_colnames = get_data()
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
 
@@ -248,9 +248,9 @@ sidebar = [
                                         options=[
                                             {"label": col, "value": col}
                                             for col in df.columns
-                                            if col != "city"
+                                            if col in num_colnames
                                         ],
-                                        value="bedrooms",  # Default value
+                                        value="price",  # Default value
                                     ),
                                 ],
                                 style={
