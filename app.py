@@ -2,21 +2,15 @@ import json
 
 import dash
 import dash_bootstrap_components as dbc
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
-# Sample data
-df = pd.DataFrame(
-    {
-        "Country": ["USA", "Canada", "Germany", "UK", "France"],
-        "Population": [331, 38, 83, 67, 65],
-        "Area": [9833517, 9984670, 357022, 243610, 551695],
-        "GDP": [21137518, 1848270, 3845630, 2825208, 2715518],
-    }
-)
+from data.london_houses import get_data
+
+df, cat_columns = get_data()
+
 external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
 
 # Initialize the Dash app with suppress_callback_exceptions
@@ -234,7 +228,7 @@ sidebar = [
                                             {"label": col, "value": col}
                                             for col in df.columns
                                         ],
-                                        value="Population",  # Default value
+                                        value="sqft",  # Default value
                                     ),
                                 ],
                                 style={
@@ -253,9 +247,9 @@ sidebar = [
                                         options=[
                                             {"label": col, "value": col}
                                             for col in df.columns
-                                            if col != "Country"
+                                            if col not in cat_columns
                                         ],
-                                        value="GDP",  # Default value
+                                        value="price",  # Default value
                                     ),
                                 ],
                                 style={
@@ -376,13 +370,29 @@ app.layout = html.Div(
     Input("x-axis-selector", "value"),
 )
 def update_x_axis_scale_style(x_axis):
-    if x_axis == "Country":
+    if x_axis in cat_columns:
         return [
             {"label": "", "value": "linear"},
-        ], True  # Hide the X axis scale switch if Country is selected
+        ], True  # Hide the X axis scale switch if city is selected
     return [
         {"label": "Linear", "value": "linear"},
         {"label": "Logarithmic", "value": "log"},
+    ], False  # Show it otherwise
+
+
+# Callback to update Y axis scale options based on selected X axis
+@app.callback(
+    Output("y-axis-selector", "options"),
+    Output("y-axis-selector", "disabled"),
+    Input("x-axis-selector", "value"),
+)
+def update_y_axis_variables_selection(x_axis):
+    if x_axis in cat_columns:
+        return [
+            {"label": "", "value": ""},
+        ], True  # Hide the Y axis selector
+    return [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
     ], False  # Show it otherwise
 
 
@@ -397,23 +407,25 @@ def update_x_axis_scale_style(x_axis):
     Input("color-theme-selector", "value"),
 )
 def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
-    if x_axis == "Country":
-        fig = px.bar(df, x="Country", y=y_axis)
+    if x_axis in cat_columns:
+        df_count = df[x_axis].value_counts().reset_index()
+        df_count.columns = [x_axis, "count"]
+        fig = px.bar(df_count, x=x_axis, y="count")
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"{y_axis} by Country",
-            xaxis_title="Country",
-            yaxis_title=y_axis,
+            title=f"count per {x_axis}",
+            xaxis_title=x_axis,
+            yaxis_title="count",
             template=color_theme,
         )
     else:
-        fig = px.scatter(df, x=x_axis, y=y_axis, text="Country")
+        fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
         fig.update_traces(textposition="top center")
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
         fig.update_layout(
-            title=f"{y_axis} vs {x_axis}",
+            title=f"{y_axis} vs. {x_axis}",
             xaxis_title=x_axis,
             yaxis_title=y_axis,
             template=color_theme,

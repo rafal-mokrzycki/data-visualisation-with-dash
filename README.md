@@ -10,8 +10,8 @@ Web app for plot generation.
 1. Create and activate virtual environment:
 
 ```
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 2. Install required packages:
 
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 
 ### For Linux
 
-Activate virtual environment: `source venv/bin/activate`.
+Activate virtual environment: `source .venv/bin/activate`.
 
 Run app: `python3 app.py`.
 
