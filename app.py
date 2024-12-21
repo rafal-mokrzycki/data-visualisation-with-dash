@@ -237,9 +237,7 @@ sidebar = [
                                             {"label": col, "value": col}
                                             for col in df.columns
                                         ],
-                                        value=df.columns.values.tolist()[
-                                            0
-                                        ],  # Default value
+                                        value=df.columns.values.tolist()[0],
                                     ),
                                 ],
                                 style={
@@ -260,7 +258,9 @@ sidebar = [
                                             for col in df.columns
                                             if col not in cat_columns
                                         ],
-                                        value=df.columns.values.tolist()[
+                                        value=df[
+                                            df.columns.difference(cat_columns)
+                                        ].columns.values.tolist()[
                                             0
                                         ],  # Default value
                                     ),
@@ -381,7 +381,8 @@ app.layout = html.Div(
     # Output("output-container", "children"),
     Output("x-axis-selector", "options"),
     Output("y-axis-selector", "options"),
-    Output("dataset-selector", "value"),
+    Output("x-axis-selector", "value"),
+    Output("y-axis-selector", "value"),
     Input("dataset-selector", "value"),
 )
 def update_data_options(selected_dataset):
@@ -397,21 +398,26 @@ def update_data_options(selected_dataset):
         {"label": col, "value": col} for col in df.columns if col not in cat_columns
     ]
 
-    return x_options, y_options, selected_dataset
+    return (
+        x_options,
+        y_options,
+        x_options[0]["value"],
+        y_options[0]["value"],
+    )
 
 
 # Combined callback for Y axis options and disabled state based on selected X axis
-# @app.callback(
-#     Output("y-axis-selector", "options"),
-#     Output("y-axis-selector", "disabled"),
-#     Input("x-axis-selector", "value"),
-# )
-# def update_y_axis_variables_selection(x_axis):
-#     if x_axis in cat_columns:
-#         return [{"label": "", "value": ""}], True  # Hide Y axis selector if categorical
-#     return [
-#         {"label": col, "value": col} for col in df.columns if col not in cat_columns
-#     ], False  # Show it otherwise
+@app.callback(
+    Output("y-axis-selector", "options"),
+    Output("y-axis-selector", "disabled"),
+    Input("x-axis-selector", "value"),
+)
+def update_y_axis_variables_selection(x_axis):
+    if x_axis in cat_columns:
+        return [{"label": "", "value": ""}], True  # Hide Y axis selector if categorical
+    return [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
+    ], False  # Show it otherwise
 
 
 # Callback to update graph and store its figure data
