@@ -18,7 +18,8 @@ app = dash.Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP, "assets/style.css"],
 )
 # Global variable to store the dataframe
-df = pd.DataFrame()
+df, cat_columns = get_dataframe_to_plot()
+
 # Modal
 with open("EXPLANATIONS.md", "r") as f:
     howto_md = f.read()
@@ -212,10 +213,10 @@ sidebar = [
                     dcc.Dropdown(
                         id="dataset-selector",
                         options=[
-                            {"label": "Housing Data", "value": "housing"},
-                            {"label": "Credit Risk", "value": "credit_risk"},
+                            {"label": "Housing Data", "value": "Housing Data"},
+                            {"label": "Credit Risk", "value": "Credit Risk"},
                         ],
-                        value="housing",  # Default value
+                        value="Housing Data",  # Default value
                     ),
                     # Title for selecting variables with spacing
                     html.H5(
@@ -236,7 +237,9 @@ sidebar = [
                                             {"label": col, "value": col}
                                             for col in df.columns
                                         ],
-                                        value="sqft",  # Default value
+                                        value=df.columns.values.tolist()[
+                                            0
+                                        ],  # Default value
                                     ),
                                 ],
                                 style={
@@ -257,7 +260,9 @@ sidebar = [
                                             for col in df.columns
                                             if col not in cat_columns
                                         ],
-                                        value="price",  # Default value
+                                        value=df.columns.values.tolist()[
+                                            0
+                                        ],  # Default value
                                     ),
                                 ],
                                 style={
@@ -371,10 +376,12 @@ app.layout = html.Div(
 )
 
 
-# Callback to update the dataframe based on user selection
+# Callback to update dataframe based on user selection
 @app.callback(
+    # Output("output-container", "children"),
     Output("x-axis-selector", "options"),
     Output("y-axis-selector", "options"),
+    Output("dataset-selector", "value"),
     Input("dataset-selector", "value"),
 )
 def update_data_options(selected_dataset):
@@ -383,40 +390,28 @@ def update_data_options(selected_dataset):
     df, cat_columns = get_dataframe_to_plot(
         selected_dataset
     )  # Update df based on selection
+
+    # Generate options for x and y axis selectors based on dataframe columns
     x_options = [{"label": col, "value": col} for col in df.columns]
     y_options = [
         {"label": col, "value": col} for col in df.columns if col not in cat_columns
     ]
-    return x_options, y_options
+
+    return x_options, y_options, selected_dataset
 
 
-# Callback for Y axis options based on selected X axis
+# Combined callback for Y axis options and disabled state based on selected X axis
 # @app.callback(
 #     Output("y-axis-selector", "options"),
+#     Output("y-axis-selector", "disabled"),
 #     Input("x-axis-selector", "value"),
 # )
 # def update_y_axis_variables_selection(x_axis):
 #     if x_axis in cat_columns:
-#         return [{"label": "", "value": ""}], True  # Hide Y axis selector
+#         return [{"label": "", "value": ""}], True  # Hide Y axis selector if categorical
 #     return [
 #         {"label": col, "value": col} for col in df.columns if col not in cat_columns
-#     ], False
-
-
-# Callback to update Y axis scale options based on selected X axis
-@app.callback(
-    Output("y-axis-selector", "options"),
-    Output("y-axis-selector", "disabled"),
-    Input("x-axis-selector", "value"),
-)
-def update_y_axis_variables_selection(x_axis):
-    if x_axis in cat_columns:
-        return [
-            {"label": "", "value": ""},
-        ], True  # Hide the Y axis selector
-    return [
-        {"label": col, "value": col} for col in df.columns if col not in cat_columns
-    ], False  # Show it otherwise
+#     ], False  # Show it otherwise
 
 
 # Callback to update graph and store its figure data

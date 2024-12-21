@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def get_dataframe_to_plot(name: str) -> pd.DataFrame:
+def get_dataframe_to_plot(name: str = "housing data") -> pd.DataFrame:
     if name.lower() == "housing data":
         from data_queries.housing_queries import build_plot_df
 
