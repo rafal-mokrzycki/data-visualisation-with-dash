@@ -2,23 +2,23 @@ import json
 
 import dash
 import dash_bootstrap_components as dbc
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
-from data.london_houses import get_data
+from data.get_data import get_dataframe_to_plot
 
-df, cat_columns = get_data()
-
-external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
+DATASETS = ["Housing Data", "Credit Risk"]
 
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    external_stylesheets=external_stylesheets,
+    external_stylesheets=[dbc.themes.BOOTSTRAP, "assets/style.css"],
 )
-
+# Global variable to store the dataframe
+df = pd.DataFrame()
 # Modal
 with open("EXPLANATIONS.md", "r") as f:
     howto_md = f.read()
@@ -209,6 +209,14 @@ sidebar = [
             dbc.CardHeader("Tools"),
             dbc.CardBody(
                 [
+                    dcc.Dropdown(
+                        id="dataset-selector",
+                        options=[
+                            {"label": "Housing Data", "value": "housing"},
+                            {"label": "Credit Risk", "value": "credit_risk"},
+                        ],
+                        value="housing",  # Default value
+                    ),
                     # Title for selecting variables with spacing
                     html.H5(
                         "Select variables",
@@ -363,21 +371,36 @@ app.layout = html.Div(
 )
 
 
-# Callback to update Y axis scale options based on selected X axis
+# Callback to update the dataframe based on user selection
 @app.callback(
-    Output("x-axis-scale", "options"),
-    Output("x-axis-scale", "disabled"),
-    Input("x-axis-selector", "value"),
+    Output("x-axis-selector", "options"),
+    Output("y-axis-selector", "options"),
+    Input("dataset-selector", "value"),
 )
-def update_x_axis_scale_style(x_axis):
-    if x_axis in cat_columns:
-        return [
-            {"label": "", "value": "linear"},
-        ], True  # Hide the X axis scale switch if city is selected
-    return [
-        {"label": "Linear", "value": "linear"},
-        {"label": "Logarithmic", "value": "log"},
-    ], False  # Show it otherwise
+def update_data_options(selected_dataset):
+    global df  # Declare df as global to modify it
+    global cat_columns
+    df, cat_columns = get_dataframe_to_plot(
+        selected_dataset
+    )  # Update df based on selection
+    x_options = [{"label": col, "value": col} for col in df.columns]
+    y_options = [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
+    ]
+    return x_options, y_options
+
+
+# Callback for Y axis options based on selected X axis
+# @app.callback(
+#     Output("y-axis-selector", "options"),
+#     Input("x-axis-selector", "value"),
+# )
+# def update_y_axis_variables_selection(x_axis):
+#     if x_axis in cat_columns:
+#         return [{"label": "", "value": ""}], True  # Hide Y axis selector
+#     return [
+#         {"label": col, "value": col} for col in df.columns if col not in cat_columns
+#     ], False
 
 
 # Callback to update Y axis scale options based on selected X axis

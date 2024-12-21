@@ -9,17 +9,16 @@ logging.basicConfig(
 )
 
 
-def get_data(debug: bool = False, cat_columns: list = None):
-    if cat_columns is None:
-        cat_columns = [
-            "bedrooms",
-            "bathrooms",
-            "house_type",
-            "receptions",
-            "location",
-            "city",
-        ]
-    df = pd.read_csv("data/London_houses.csv")
+def build_plot_df(debug=False):
+    df = pd.read_csv("data/raw_data/London_houses.csv")
+    cat_columns = [
+        "bedrooms",
+        "bathrooms",
+        "house_type",
+        "receptions",
+        "location",
+        "city",
+    ]
     df = remove_columns(df=df, columns=["no", "property_name", "postal_code"])
     df = get_categorical(
         df=df,
@@ -44,4 +43,4 @@ def get_categorical(df: pd.DataFrame, columns: list = None):
 
 
 if __name__ == "__main__":
-    get_data(debug=True)
+    build_plot_df(debug=True)
