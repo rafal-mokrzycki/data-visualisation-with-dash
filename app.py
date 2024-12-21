@@ -16,6 +16,7 @@ app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     assets_folder="dashboard/assets",
+    prevent_initial_callbacks="initial_duplicate",
 )
 # Global variable to store the dataframe
 df, cat_columns = get_dataframe_to_plot()
@@ -379,10 +380,10 @@ app.layout = html.Div(
 # Callback to update dataframe based on user selection
 @app.callback(
     # Output("output-container", "children"),
-    Output("x-axis-selector", "options"),
-    Output("y-axis-selector", "options"),
-    Output("x-axis-selector", "value"),
-    Output("y-axis-selector", "value"),
+    Output("x-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("x-axis-selector", "value", allow_duplicate=True),
+    Output("y-axis-selector", "value", allow_duplicate=True),
     Input("dataset-selector", "value"),
 )
 def update_data_options(selected_dataset):
@@ -408,16 +409,29 @@ def update_data_options(selected_dataset):
 
 # Combined callback for Y axis options and disabled state based on selected X axis
 @app.callback(
-    Output("y-axis-selector", "options"),
-    Output("y-axis-selector", "disabled"),
+    Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "disabled", allow_duplicate=True),
+    Output("x-axis-scale", "options", allow_duplicate=True),
+    Output("x-axis-scale", "disabled", allow_duplicate=True),
     Input("x-axis-selector", "value"),
 )
 def update_y_axis_variables_selection(x_axis):
     if x_axis in cat_columns:
-        return [{"label": "", "value": ""}], True  # Hide Y axis selector if categorical
-    return [
-        {"label": col, "value": col} for col in df.columns if col not in cat_columns
-    ], False  # Show it otherwise
+        return (
+            [{"label": "", "value": ""}],
+            True,
+            [{"label": "", "value": ""}],
+            True,
+        )  # Hide Y axis selector if categorical
+    return (
+        [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
+        False,
+        [
+            {"label": "Linear", "value": "linear"},
+            {"label": "Logarithmic", "value": "log"},
+        ],
+        False,
+    )  # Show it otherwise
 
 
 # Callback to update graph and store its figure data
