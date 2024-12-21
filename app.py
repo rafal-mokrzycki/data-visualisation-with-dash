@@ -7,17 +7,32 @@ import plotly.graph_objects as go
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
-from data.london_houses import get_data
+from data.get_data import get_dataframe_to_plot
 
-df, cat_columns = get_data()
-
-external_stylesheets = [dbc.themes.BOOTSTRAP, "assets/style.css"]
+DATASETS = ["Housing Data", "Credit Risk"]
+SCALE_OPTIONS = [
+    {"label": "Housing Data", "value": "Housing Data"},
+    {"label": "Credit Risk", "value": "Credit Risk"},
+]
+PLOT_THEMES = [
+    "plotly",
+    "plotly_white",
+    "plotly_dark",
+    "ggplot2",
+    "seaborn",
+    "simple_white",
+    "none",
+]
 
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    external_stylesheets=external_stylesheets,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    assets_folder="dashboard/assets",
+    prevent_initial_callbacks="initial_duplicate",
 )
+# Global variable to store the dataframe
+df, cat_columns = get_dataframe_to_plot()
 
 # Modal
 with open("EXPLANATIONS.md", "r") as f:
@@ -60,7 +75,7 @@ header = dbc.Navbar(
                     dbc.Col(
                         html.Img(
                             id="logo",
-                            src=app.get_asset_url("dash-logo-new.png"),
+                            src="assets/dash-logo-new.png",
                             height="30px",
                         ),
                         md="auto",
@@ -209,6 +224,14 @@ sidebar = [
             dbc.CardHeader("Tools"),
             dbc.CardBody(
                 [
+                    dcc.Dropdown(
+                        id="dataset-selector",
+                        options=[
+                            {"label": "Housing Data", "value": "Housing Data"},
+                            {"label": "Credit Risk", "value": "Credit Risk"},
+                        ],
+                        value="Housing Data",  # Default value
+                    ),
                     # Title for selecting variables with spacing
                     html.H5(
                         "Select variables",
@@ -228,7 +251,7 @@ sidebar = [
                                             {"label": col, "value": col}
                                             for col in df.columns
                                         ],
-                                        value="sqft",  # Default value
+                                        value=df.columns.values.tolist()[0],
                                     ),
                                 ],
                                 style={
@@ -249,7 +272,11 @@ sidebar = [
                                             for col in df.columns
                                             if col not in cat_columns
                                         ],
-                                        value="price",  # Default value
+                                        value=df[
+                                            df.columns.difference(cat_columns)
+                                        ].columns.values.tolist()[
+                                            0
+                                        ],  # Default value
                                     ),
                                 ],
                                 style={
@@ -277,10 +304,7 @@ sidebar = [
                                     html.Label("X Axis Scale"),
                                     dcc.Dropdown(
                                         id="x-axis-scale",
-                                        options=[
-                                            {"label": "Linear", "value": "linear"},
-                                            {"label": "Logarithmic", "value": "log"},
-                                        ],
+                                        options=SCALE_OPTIONS,
                                         value="linear",  # Default scale
                                         disabled=False,
                                     ),
@@ -325,16 +349,7 @@ sidebar = [
                     dcc.Dropdown(
                         id="color-theme-selector",
                         options=[
-                            {"label": theme, "value": theme}
-                            for theme in [
-                                "plotly",
-                                "plotly_white",
-                                "plotly_dark",
-                                "ggplot2",
-                                "seaborn",
-                                "simple_white",
-                                "none",
-                            ]
+                            {"label": theme, "value": theme} for theme in PLOT_THEMES
                         ],
                         value="plotly",  # Default value
                         style={"marginBottom": "20px"},
@@ -363,37 +378,58 @@ app.layout = html.Div(
 )
 
 
-# Callback to update Y axis scale options based on selected X axis
+# Callback to update dataframe based on user selection
 @app.callback(
-    Output("x-axis-scale", "options"),
-    Output("x-axis-scale", "disabled"),
-    Input("x-axis-selector", "value"),
+    # Output("output-container", "children"),
+    Output("x-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("x-axis-selector", "value", allow_duplicate=True),
+    Output("y-axis-selector", "value", allow_duplicate=True),
+    Input("dataset-selector", "value"),
 )
-def update_x_axis_scale_style(x_axis):
-    if x_axis in cat_columns:
-        return [
-            {"label": "", "value": "linear"},
-        ], True  # Hide the X axis scale switch if city is selected
-    return [
-        {"label": "Linear", "value": "linear"},
-        {"label": "Logarithmic", "value": "log"},
-    ], False  # Show it otherwise
+def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
+    global df  # Declare df as global to modify it
+    global cat_columns
+    df, cat_columns = get_dataframe_to_plot(
+        selected_dataset
+    )  # Update df based on selection
 
-
-# Callback to update Y axis scale options based on selected X axis
-@app.callback(
-    Output("y-axis-selector", "options"),
-    Output("y-axis-selector", "disabled"),
-    Input("x-axis-selector", "value"),
-)
-def update_y_axis_variables_selection(x_axis):
-    if x_axis in cat_columns:
-        return [
-            {"label": "", "value": ""},
-        ], True  # Hide the Y axis selector
-    return [
+    # Generate options for x and y axis selectors based on dataframe columns
+    x_options = [{"label": col, "value": col} for col in df.columns]
+    y_options = [
         {"label": col, "value": col} for col in df.columns if col not in cat_columns
-    ], False  # Show it otherwise
+    ]
+
+    return (
+        x_options,
+        y_options,
+        x_options[0]["value"],
+        y_options[0]["value"],
+    )
+
+
+# Combined callback for Y axis options and disabled state based on selected X axis
+@app.callback(
+    Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "disabled", allow_duplicate=True),
+    Output("x-axis-scale", "options", allow_duplicate=True),
+    Output("x-axis-scale", "disabled", allow_duplicate=True),
+    Input("x-axis-selector", "value"),
+)
+def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bool]:
+    if x_axis in cat_columns:
+        return (
+            [{"label": "", "value": ""}],
+            True,
+            [{"label": "", "value": ""}],
+            True,
+        )  # Hide Y axis selector if categorical
+    return (
+        [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
+        False,
+        SCALE_OPTIONS,
+        False,
+    )  # Show it otherwise
 
 
 # Callback to update graph and store its figure data
@@ -406,7 +442,9 @@ def update_y_axis_variables_selection(x_axis):
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
 )
-def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
+def update_graph(
+    x_axis: str, y_axis: str, x_scale: str, y_scale: str, color_theme: str
+) -> tuple[go.Figure, dict]:
     if x_axis in cat_columns:
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
@@ -494,4 +532,4 @@ def toggle_navbar_collapse(n, is_open):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8080)
+    app.run_server(debug=True, port=8050)
