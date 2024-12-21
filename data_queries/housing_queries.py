@@ -2,6 +2,8 @@ import logging
 
 import pandas as pd
 
+from utils.data_manipulation import get_categorical, remove_columns
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -30,16 +32,6 @@ def build_plot_df(debug=False):
         logging.debug(f"DATAFRAME (more info):\n{df.describe()}")
         logging.debug(f"DATAFRAME (null values):\n{df.isna().sum()}")
     return df, cat_columns
-
-
-def remove_columns(df: pd.DataFrame, columns: list = None):
-    res = df.drop(columns=columns)
-    return res
-
-
-def get_categorical(df: pd.DataFrame, columns: list = None):
-    df[columns] = df[columns].astype("category")
-    return df
 
 
 if __name__ == "__main__":
