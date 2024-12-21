@@ -14,7 +14,8 @@ DATASETS = ["Housing Data", "Credit Risk"]
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP, "assets/style.css"],
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    assets_folder="dashboard/assets",
 )
 # Global variable to store the dataframe
 df, cat_columns = get_dataframe_to_plot()
@@ -60,7 +61,7 @@ header = dbc.Navbar(
                     dbc.Col(
                         html.Img(
                             id="logo",
-                            src=app.get_asset_url("dash-logo-new.png"),
+                            src="assets/dash-logo-new.png",
                             height="30px",
                         ),
                         md="auto",
@@ -511,4 +512,4 @@ def toggle_navbar_collapse(n, is_open):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8080)
+    app.run_server(debug=True, port=8050)
