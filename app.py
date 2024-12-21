@@ -10,6 +10,19 @@ from dash.dependencies import Input, Output, State
 from data.get_data import get_dataframe_to_plot
 
 DATASETS = ["Housing Data", "Credit Risk"]
+SCALE_OPTIONS = [
+    {"label": "Housing Data", "value": "Housing Data"},
+    {"label": "Credit Risk", "value": "Credit Risk"},
+]
+PLOT_THEMES = [
+    "plotly",
+    "plotly_white",
+    "plotly_dark",
+    "ggplot2",
+    "seaborn",
+    "simple_white",
+    "none",
+]
 
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
@@ -291,10 +304,7 @@ sidebar = [
                                     html.Label("X Axis Scale"),
                                     dcc.Dropdown(
                                         id="x-axis-scale",
-                                        options=[
-                                            {"label": "Linear", "value": "linear"},
-                                            {"label": "Logarithmic", "value": "log"},
-                                        ],
+                                        options=SCALE_OPTIONS,
                                         value="linear",  # Default scale
                                         disabled=False,
                                     ),
@@ -339,16 +349,7 @@ sidebar = [
                     dcc.Dropdown(
                         id="color-theme-selector",
                         options=[
-                            {"label": theme, "value": theme}
-                            for theme in [
-                                "plotly",
-                                "plotly_white",
-                                "plotly_dark",
-                                "ggplot2",
-                                "seaborn",
-                                "simple_white",
-                                "none",
-                            ]
+                            {"label": theme, "value": theme} for theme in PLOT_THEMES
                         ],
                         value="plotly",  # Default value
                         style={"marginBottom": "20px"},
@@ -386,7 +387,7 @@ app.layout = html.Div(
     Output("y-axis-selector", "value", allow_duplicate=True),
     Input("dataset-selector", "value"),
 )
-def update_data_options(selected_dataset):
+def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     global df  # Declare df as global to modify it
     global cat_columns
     df, cat_columns = get_dataframe_to_plot(
@@ -415,7 +416,7 @@ def update_data_options(selected_dataset):
     Output("x-axis-scale", "disabled", allow_duplicate=True),
     Input("x-axis-selector", "value"),
 )
-def update_y_axis_variables_selection(x_axis):
+def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bool]:
     if x_axis in cat_columns:
         return (
             [{"label": "", "value": ""}],
@@ -426,10 +427,7 @@ def update_y_axis_variables_selection(x_axis):
     return (
         [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
         False,
-        [
-            {"label": "Linear", "value": "linear"},
-            {"label": "Logarithmic", "value": "log"},
-        ],
+        SCALE_OPTIONS,
         False,
     )  # Show it otherwise
 
@@ -444,7 +442,9 @@ def update_y_axis_variables_selection(x_axis):
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
 )
-def update_graph(x_axis, y_axis, x_scale, y_scale, color_theme):
+def update_graph(
+    x_axis: str, y_axis: str, x_scale: str, y_scale: str, color_theme: str
+) -> tuple[go.Figure, dict]:
     if x_axis in cat_columns:
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]

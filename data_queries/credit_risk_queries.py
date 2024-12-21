@@ -1,17 +1,23 @@
-import logging
-
 import pandas as pd
 
 from utils.data_manipulation import drop_outliers, get_categorical, process_null_values
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.FileHandler("debug.log"), logging.StreamHandler()],
-)
+from utils.logging import logger
 
 
-def build_plot_df(debug=False):
+def build_plot_df(debug: bool = False) -> tuple[pd.DataFrame, list]:
+    """
+    Load and prepare the credit risk dataset for plotting.
+
+    Parameters:
+    debug (bool): If True, enables debug logging to provide insights into
+                  the loaded DataFrame, including its head, data types,
+                  summary statistics, and null value counts.
+
+    Returns:
+    tuple[pd.DataFrame, list]: A tuple containing the DataFrame with
+                                processed data and a list of categorical
+                                columns.
+    """
     df = pd.read_csv("data/raw_data/credit_risk_dataset.csv")
     cat_columns = [
         "person_home_ownership",
@@ -29,10 +35,10 @@ def build_plot_df(debug=False):
     df = drop_outliers(df=df, columns=["person_age"])
 
     if debug:
-        logging.debug(f"DATAFRAME:\n{df.head()}")
-        logging.debug(f"DATATYPES:\n{df.dtypes}")
-        logging.debug(f"DATAFRAME (more info):\n{df.describe()}")
-        logging.debug(f"DATAFRAME (null values):\n{df.isna().sum()}")
+        logger.debug(f"DATAFRAME:\n{df.head()}")
+        logger.debug(f"DATATYPES:\n{df.dtypes}")
+        logger.debug(f"DATAFRAME (more info):\n{df.describe()}")
+        logger.debug(f"DATAFRAME (null values):\n{df.isna().sum()}")
     return df, cat_columns
 
 
