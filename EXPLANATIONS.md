@@ -1,3 +1,1 @@
-You can plot the data by selecting columns, scales and color theme.
-You can zoom the plot by selecting a rectangle area on the plot with the mouse.
-Finally, you can download the plot in one of the following formats: PNG, JPG, SVG.
+This is an example of an interactive economic data plotter that allows users to visualize two datasets through bar plots and scatter plots. Users can enhance their scatter plots by adding linear trendlines, providing valuable insights into data trends and relationships. The application offers customizable color schemes, enabling users to tailor the visual appearance of their plots to better suit their presentation needs. Additionally, users have the option to download their visualizations in multiple formats, including PNG, JPG, and SVG, ensuring compatibility with various applications and platforms. This tool aims to facilitate data analysis and improve the accessibility of economic data visualization for users of all skill levels.
