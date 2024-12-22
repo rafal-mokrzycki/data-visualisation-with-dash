@@ -291,6 +291,17 @@ sidebar = [
                         style={
                             "display": "inline",
                         },
+                    ),  # Checkbox to select trenline
+                    html.Div(
+                        [
+                            dcc.Checklist(
+                                id="scatter-plot-trendline",
+                                options=[
+                                    {"label": "Show Trendline", "value": "trendline"}
+                                ],
+                                value=[],  # Default value (unchecked)
+                            ),
+                        ]
                     ),
                     # Title for selecting scale with spacing
                     html.H5(
@@ -451,10 +462,17 @@ def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bo
     Input("x-axis-scale", "value"),
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
+    Input("scatter-plot-trendline", "value"),  # New input for trendline checkbox
 )
 def update_graph(
-    x_axis: str, y_axis: str, x_scale: str, y_scale: str, color_theme: str
-) -> tuple[go.Figure, dict]:
+    x_axis: str,
+    y_axis: str,
+    x_scale: str,
+    y_scale: str,
+    color_theme: str,
+    trendline: list,
+) -> tuple[go.Figure, dict, dict]:
+
     if x_axis in cat_columns:
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
@@ -462,13 +480,24 @@ def update_graph(
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"count per {x_axis}",
+            title=f"Count per {x_axis}",
             xaxis_title=x_axis,
-            yaxis_title="count",
+            yaxis_title="Count",
             template=color_theme,
         )
     else:
-        fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
+        if trendline:
+            fig = px.scatter(
+                df,
+                x=x_axis,
+                y=y_axis,
+                text=x_axis,
+                trendline="ols",
+                trendline_color_override="red",
+            )
+        else:
+            fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
+
         fig.update_traces(textposition="top center")
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
@@ -479,7 +508,7 @@ def update_graph(
             template=color_theme,
         )
 
-    return fig, fig.to_json()  # Store figure as JSON
+    return fig, fig.to_json()  # Return style for checkbox visibility
 
 
 # Callback to handle download requests using stored figure data
