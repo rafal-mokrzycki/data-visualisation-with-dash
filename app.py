@@ -56,7 +56,7 @@ button_howto = dbc.Button(
     outline=True,
     color="info",
     # Turn off lowercase transformation for class .button in stylesheet
-    style={"textTransform": "none"},
+    style={"textTransform": "none", "marginRight": "10px"},
 )
 
 button_github = dbc.Button(
@@ -66,6 +66,7 @@ button_github = dbc.Button(
     href="https://github.com/rafal-mokrzycki/dash-pandas/",
     id="gh-link",
     style={"text-transform": "none"},
+    target="_blank",
 )
 
 
@@ -300,6 +301,7 @@ sidebar = [
                                     {"label": "Show Trendline", "value": "trendline"}
                                 ],
                                 value=[],  # Default value (unchecked)
+                                inputStyle={"marginRight": "5px"},
                             ),
                         ]
                     ),
@@ -309,22 +311,17 @@ sidebar = [
                         className="card-title",
                         style={"marginBottom": "20px", "marginTop": "20px"},
                     ),
-                    # Dropdown for selecting X axis scale
+                    # Checkboxes for selecting axes scales
                     html.Div(
                         [
-                            # Dropdown for selecting X axis scale
+                            # Checkbox for selecting X axis scale
                             html.Div(
                                 [
-                                    # dcc.Dropdown(
-                                    #     id="x-axis-scale",
-                                    #     options=SCALE_OPTIONS,
-                                    #     value="linear",  # Default scale
-                                    #     disabled=False,
-                                    # ),
                                     dcc.RadioItems(
                                         id="x-axis-scale",
                                         options=SCALE_OPTIONS,
                                         value="linear",
+                                        inputStyle={"marginRight": "5px"},
                                     )
                                 ],
                                 style={
@@ -334,19 +331,14 @@ sidebar = [
                                     "float": "left",
                                 },
                             ),
-                            # Dropdown for selecting Y axis scale
+                            # Checkbox for selecting Y axis scale
                             html.Div(
                                 [
-                                    # dcc.Dropdown(
-                                    #     id="x-axis-scale",
-                                    #     options=SCALE_OPTIONS,
-                                    #     value="linear",  # Default scale
-                                    #     disabled=False,
-                                    # ),
                                     dcc.RadioItems(
                                         id="y-axis-scale",
                                         options=SCALE_OPTIONS,
                                         value="linear",
+                                        inputStyle={"marginRight": "5px"},
                                     )
                                 ],
                                 style={
