@@ -7,7 +7,7 @@
 [x] Data preprocessing (categorical columns)
 [x] Add another dataset to choose from
 [x] Add a switch to plot either of the two datasets
-[ ] Trendline feature
+[x] Trendline feature
 [ ] 3 variables plotting
 [ ] 3D plotting
 [ ] Change plot colors feature
