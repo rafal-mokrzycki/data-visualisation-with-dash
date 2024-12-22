@@ -304,12 +304,17 @@ sidebar = [
                             # Dropdown for selecting X axis scale
                             html.Div(
                                 [
-                                    dcc.Dropdown(
+                                    # dcc.Dropdown(
+                                    #     id="x-axis-scale",
+                                    #     options=SCALE_OPTIONS,
+                                    #     value="linear",  # Default scale
+                                    #     disabled=False,
+                                    # ),
+                                    dcc.RadioItems(
                                         id="x-axis-scale",
                                         options=SCALE_OPTIONS,
-                                        value="linear",  # Default scale
-                                        disabled=False,
-                                    ),
+                                        value="linear",
+                                    )
                                 ],
                                 style={
                                     "width": "48%",
@@ -321,11 +326,17 @@ sidebar = [
                             # Dropdown for selecting Y axis scale
                             html.Div(
                                 [
-                                    dcc.Dropdown(
+                                    # dcc.Dropdown(
+                                    #     id="x-axis-scale",
+                                    #     options=SCALE_OPTIONS,
+                                    #     value="linear",  # Default scale
+                                    #     disabled=False,
+                                    # ),
+                                    dcc.RadioItems(
                                         id="y-axis-scale",
                                         options=SCALE_OPTIONS,
-                                        value="linear",  # Default scale
-                                    ),
+                                        value="linear",
+                                    )
                                 ],
                                 style={
                                     "width": "48%",
@@ -411,7 +422,8 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     Output("y-axis-selector", "options", allow_duplicate=True),
     Output("y-axis-selector", "disabled", allow_duplicate=True),
     Output("x-axis-scale", "options", allow_duplicate=True),
-    Output("x-axis-scale", "disabled", allow_duplicate=True),
+    Output("x-axis-scale", "value", allow_duplicate=True),
+    # Output("x-axis-scale", "disabled", allow_duplicate=True),
     Input("x-axis-selector", "value"),
 )
 def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bool]:
@@ -419,14 +431,14 @@ def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bo
         return (
             [{"label": "", "value": ""}],
             True,
-            [{"label": "", "value": ""}],
-            True,
+            [{"label": "Nominal", "value": "Nominal"}],
+            "Nominal",
         )  # Hide Y axis selector if categorical
     return (
         [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
         False,
         SCALE_OPTIONS,
-        False,
+        "linear",
     )  # Show it otherwise
 
 
@@ -530,4 +542,4 @@ def toggle_navbar_collapse(n, is_open):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8050)
+    app.run(debug=True, port=8080)
