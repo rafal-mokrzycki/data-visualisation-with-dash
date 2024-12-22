@@ -472,7 +472,8 @@ def update_graph(
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"Count per {x_axis}",
+            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
+            title_x=0.5,
             xaxis_title=x_axis,
             yaxis_title="Count",
             template=color_theme,
@@ -494,7 +495,8 @@ def update_graph(
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
         fig.update_layout(
-            title=f"{y_axis} vs. {x_axis}",
+            title=dict(text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)),
+            title_x=0.5,
             xaxis_title=x_axis,
             yaxis_title=y_axis,
             template=color_theme,
