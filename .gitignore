@@ -132,3 +132,9 @@ dmypy.json
 output_image.png
 output_image.jpg
 output_image.svg
+
+# tmp files
+*bkp.py
+*bkp*.py
+*bkp.pybkp
+*bkp*.pybkp
