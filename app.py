@@ -10,9 +10,13 @@ from dash.dependencies import Input, Output, State
 from data.get_data import get_dataframe_to_plot
 
 DATASETS = ["Housing Data", "Credit Risk"]
-SCALE_OPTIONS = [
+DATASET_OPTIONS = [
     {"label": "Housing Data", "value": "Housing Data"},
     {"label": "Credit Risk", "value": "Credit Risk"},
+]
+SCALE_OPTIONS = [
+    {"label": "Linear", "value": "linear"},
+    {"label": "Logarithmic", "value": "log"},
 ]
 PLOT_THEMES = [
     "plotly",
@@ -223,12 +227,14 @@ sidebar = [
             dbc.CardHeader("Tools"),
             dbc.CardBody(
                 [
+                    html.H5(
+                        "Select dataset",
+                        className="card-title",
+                        style={"marginBottom": "20px", "marginTop": "20px"},
+                    ),
                     dcc.Dropdown(
                         id="dataset-selector",
-                        options=[
-                            {"label": "Housing Data", "value": "Housing Data"},
-                            {"label": "Credit Risk", "value": "Credit Risk"},
-                        ],
+                        options=DATASET_OPTIONS,
                         value="Housing Data",  # Default value
                     ),
                     # Title for selecting variables with spacing
@@ -243,7 +249,6 @@ sidebar = [
                             # Dropdown to select X variable
                             html.Div(
                                 [
-                                    html.Label("X Axis"),
                                     dcc.Dropdown(
                                         id="x-axis-selector",
                                         options=[
@@ -263,7 +268,6 @@ sidebar = [
                             # Dropdown to select Y variable
                             html.Div(
                                 [
-                                    html.Label("Y Axis"),
                                     dcc.Dropdown(
                                         id="y-axis-selector",
                                         options=[
@@ -300,7 +304,6 @@ sidebar = [
                             # Dropdown for selecting X axis scale
                             html.Div(
                                 [
-                                    html.Label("X Axis Scale"),
                                     dcc.Dropdown(
                                         id="x-axis-scale",
                                         options=SCALE_OPTIONS,
@@ -318,13 +321,9 @@ sidebar = [
                             # Dropdown for selecting Y axis scale
                             html.Div(
                                 [
-                                    html.Label("Y Axis Scale"),
                                     dcc.Dropdown(
                                         id="y-axis-scale",
-                                        options=[
-                                            {"label": "Linear", "value": "linear"},
-                                            {"label": "Logarithmic", "value": "log"},
-                                        ],
+                                        options=SCALE_OPTIONS,
                                         value="linear",  # Default scale
                                     ),
                                 ],
