@@ -10,9 +10,13 @@ from dash.dependencies import Input, Output, State
 from data.get_data import get_dataframe_to_plot
 
 DATASETS = ["Housing Data", "Credit Risk"]
-SCALE_OPTIONS = [
+DATASET_OPTIONS = [
     {"label": "Housing Data", "value": "Housing Data"},
     {"label": "Credit Risk", "value": "Credit Risk"},
+]
+SCALE_OPTIONS = [
+    {"label": "Linear", "value": "linear"},
+    {"label": "Logarithmic", "value": "log"},
 ]
 PLOT_THEMES = [
     "plotly",
@@ -46,14 +50,13 @@ modal_overlay = dbc.Modal(
     id="modal",
     size="lg",
 )
-
 button_howto = dbc.Button(
     "Learn more",
     id="howto-open",
     outline=True,
     color="info",
     # Turn off lowercase transformation for class .button in stylesheet
-    style={"textTransform": "none"},
+    style={"textTransform": "none", "marginRight": "10px"},
 )
 
 button_github = dbc.Button(
@@ -63,6 +66,7 @@ button_github = dbc.Button(
     href="https://github.com/rafal-mokrzycki/dash-pandas/",
     id="gh-link",
     style={"text-transform": "none"},
+    target="_blank",
 )
 
 
@@ -149,8 +153,11 @@ description = dbc.Col(
                                 ),
                                 dbc.Col(
                                     html.P(
-                                        "This is an example of interactive economic data plotter. "  # noqa: E501
-                                        " "
+                                        "This is an example of an interactive economic data plotter that allows users to visualize two datasets through bar plots and scatter plots. "  # noqa: E501
+                                        "Users can enhance their scatter plots by adding linear trendlines, providing valuable insights into data trends and relationships. "  # noqa: E501
+                                        "The application offers customizable color schemes, enabling users to tailor the visual appearance of their plots to better suit their presentation needs. "  # noqa: E501
+                                        "Additionally, users have the option to download their visualizations in multiple formats, including PNG, JPG, and SVG, ensuring compatibility with various applications and platforms. "  # noqa: E501
+                                        "This tool aims to facilitate data analysis and improve the accessibility of economic data visualization for users of all skill levels. "  # noqa: E501
                                     ),
                                     md=True,
                                 ),
@@ -224,12 +231,14 @@ sidebar = [
             dbc.CardHeader("Tools"),
             dbc.CardBody(
                 [
+                    html.H5(
+                        "Select dataset",
+                        className="card-title",
+                        style={"marginBottom": "20px", "marginTop": "20px"},
+                    ),
                     dcc.Dropdown(
                         id="dataset-selector",
-                        options=[
-                            {"label": "Housing Data", "value": "Housing Data"},
-                            {"label": "Credit Risk", "value": "Credit Risk"},
-                        ],
+                        options=DATASET_OPTIONS,
                         value="Housing Data",  # Default value
                     ),
                     # Title for selecting variables with spacing
@@ -244,7 +253,6 @@ sidebar = [
                             # Dropdown to select X variable
                             html.Div(
                                 [
-                                    html.Label("X Axis"),
                                     dcc.Dropdown(
                                         id="x-axis-selector",
                                         options=[
@@ -264,7 +272,6 @@ sidebar = [
                             # Dropdown to select Y variable
                             html.Div(
                                 [
-                                    html.Label("Y Axis"),
                                     dcc.Dropdown(
                                         id="y-axis-selector",
                                         options=[
@@ -288,6 +295,18 @@ sidebar = [
                         style={
                             "display": "inline",
                         },
+                    ),  # Checkbox to select trenline
+                    html.Div(
+                        [
+                            dcc.Checklist(
+                                id="scatter-plot-trendline",
+                                options=[
+                                    {"label": "Show Trendline", "value": "trendline"}
+                                ],
+                                value=[],  # Default value (unchecked)
+                                inputStyle={"marginRight": "5px"},
+                            ),
+                        ]
                     ),
                     # Title for selecting scale with spacing
                     html.H5(
@@ -295,19 +314,18 @@ sidebar = [
                         className="card-title",
                         style={"marginBottom": "20px", "marginTop": "20px"},
                     ),
-                    # Dropdown for selecting X axis scale
+                    # Checkboxes for selecting axes scales
                     html.Div(
                         [
-                            # Dropdown for selecting X axis scale
+                            # Checkbox for selecting X axis scale
                             html.Div(
                                 [
-                                    html.Label("X Axis Scale"),
-                                    dcc.Dropdown(
+                                    dcc.RadioItems(
                                         id="x-axis-scale",
                                         options=SCALE_OPTIONS,
-                                        value="linear",  # Default scale
-                                        disabled=False,
-                                    ),
+                                        value="linear",
+                                        inputStyle={"marginRight": "5px"},
+                                    )
                                 ],
                                 style={
                                     "width": "48%",
@@ -316,18 +334,15 @@ sidebar = [
                                     "float": "left",
                                 },
                             ),
-                            # Dropdown for selecting Y axis scale
+                            # Checkbox for selecting Y axis scale
                             html.Div(
                                 [
-                                    html.Label("Y Axis Scale"),
-                                    dcc.Dropdown(
+                                    dcc.RadioItems(
                                         id="y-axis-scale",
-                                        options=[
-                                            {"label": "Linear", "value": "linear"},
-                                            {"label": "Logarithmic", "value": "log"},
-                                        ],
-                                        value="linear",  # Default scale
-                                    ),
+                                        options=SCALE_OPTIONS,
+                                        value="linear",
+                                        inputStyle={"marginRight": "5px"},
+                                    )
                                 ],
                                 style={
                                     "width": "48%",
@@ -413,7 +428,8 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     Output("y-axis-selector", "options", allow_duplicate=True),
     Output("y-axis-selector", "disabled", allow_duplicate=True),
     Output("x-axis-scale", "options", allow_duplicate=True),
-    Output("x-axis-scale", "disabled", allow_duplicate=True),
+    Output("x-axis-scale", "value", allow_duplicate=True),
+    # Output("x-axis-scale", "disabled", allow_duplicate=True),
     Input("x-axis-selector", "value"),
 )
 def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bool]:
@@ -421,14 +437,14 @@ def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bo
         return (
             [{"label": "", "value": ""}],
             True,
-            [{"label": "", "value": ""}],
-            True,
+            [{"label": "Nominal", "value": "Nominal"}],
+            "Nominal",
         )  # Hide Y axis selector if categorical
     return (
         [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
         False,
         SCALE_OPTIONS,
-        False,
+        "linear",
     )  # Show it otherwise
 
 
@@ -441,10 +457,17 @@ def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bo
     Input("x-axis-scale", "value"),
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
+    Input("scatter-plot-trendline", "value"),  # New input for trendline checkbox
 )
 def update_graph(
-    x_axis: str, y_axis: str, x_scale: str, y_scale: str, color_theme: str
-) -> tuple[go.Figure, dict]:
+    x_axis: str,
+    y_axis: str,
+    x_scale: str,
+    y_scale: str,
+    color_theme: str,
+    trendline: list,
+) -> tuple[go.Figure, dict, dict]:
+
     if x_axis in cat_columns:
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
@@ -452,24 +475,37 @@ def update_graph(
         if y_scale == "log":
             fig.update_yaxes(type="log")
         fig.update_layout(
-            title=f"count per {x_axis}",
+            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
+            title_x=0.5,
             xaxis_title=x_axis,
-            yaxis_title="count",
+            yaxis_title="Count",
             template=color_theme,
         )
     else:
-        fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
+        if trendline:
+            fig = px.scatter(
+                df,
+                x=x_axis,
+                y=y_axis,
+                text=x_axis,
+                trendline="ols",
+                trendline_color_override="red",
+            )
+        else:
+            fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
+
         fig.update_traces(textposition="top center")
         fig.update_xaxes(type=x_scale)
         fig.update_yaxes(type=y_scale)
         fig.update_layout(
-            title=f"{y_axis} vs. {x_axis}",
+            title=dict(text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)),
+            title_x=0.5,
             xaxis_title=x_axis,
             yaxis_title=y_axis,
             template=color_theme,
         )
 
-    return fig, fig.to_json()  # Store figure as JSON
+    return fig, fig.to_json()  # Return style for checkbox visibility
 
 
 # Callback to handle download requests using stored figure data
@@ -532,4 +568,4 @@ def toggle_navbar_collapse(n, is_open):
 
 # Run the app
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8050)
+    app.run(debug=True, port=8080)
