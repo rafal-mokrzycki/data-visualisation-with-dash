@@ -13,7 +13,7 @@ from utils.data_manipulation import (  # Replace with your actual module name
 
 
 # Sample DataFrame for testing
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sample_df():
     """Fixture to provide a sample DataFrame for testing."""
     data = {
