@@ -466,7 +466,7 @@ def update_graph(
     y_scale: str,
     color_theme: str,
     trendline: list,
-) -> tuple[go.Figure, dict, dict]:
+) -> tuple[go.Figure, str]:
 
     if x_axis in cat_columns:
         df_count = df[x_axis].value_counts().reset_index()

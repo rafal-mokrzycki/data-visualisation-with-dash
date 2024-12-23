@@ -1,5 +1,6 @@
 from contextvars import copy_context
 
+import plotly.graph_objects as go
 import pytest
 import repackage
 from dash._callback_context import context_value
@@ -19,8 +20,36 @@ from app import (
 )
 
 
-def test_update_data_options():
-    pass
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (
+            "housing data",
+            (
+                [
+                    {"label": "price", "value": "price"},
+                    {"label": "house_type", "value": "house_type"},
+                    {"label": "sqft", "value": "sqft"},
+                    {"label": "bedrooms", "value": "bedrooms"},
+                    {"label": "bathrooms", "value": "bathrooms"},
+                    {"label": "receptions", "value": "receptions"},
+                    {"label": "location", "value": "location"},
+                    {"label": "city", "value": "city"},
+                ],
+                [
+                    {"label": "price", "value": "price"},
+                    {"label": "sqft", "value": "sqft"},
+                ],
+                "price",
+                "price",
+            ),
+        ),
+    ],
+)
+def test_update_data_options(test_input, expected):
+    # TODO: mock global df and global cat_columns
+    output = update_data_options(test_input)
+    assert output == expected
 
 
 @pytest.mark.parametrize(
@@ -54,8 +83,19 @@ def test_update_y_axis_variables_selection(test_input, expected):
     assert output == expected
 
 
-def test_update_graph():
-    pass
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (
+            ("price", "sqft", "linear", "linear", "ggplot2", True),
+            (go.Figure, str),
+        ),
+    ],
+)
+def test_update_graph(test_input, expected):
+    x_axis, y_axis, x_scale, y_scale, color_theme, trendline = test_input
+    output = update_graph(x_axis, y_axis, x_scale, y_scale, color_theme, trendline)
+    assert [type(i) for i in output] == [i for i in expected]
 
 
 def test_download_image():
