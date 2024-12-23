@@ -4,7 +4,9 @@ from utils.data_manipulation import drop_outliers, get_categorical, process_null
 from utils.logging import logger
 
 
-def build_plot_df(debug: bool = False) -> tuple[pd.DataFrame, list]:
+def build_plot_df(
+    debug: bool = False, df: pd.DataFrame | None = None, cat_columns: list | None = None
+) -> tuple[pd.DataFrame, list]:
     """
     Load and prepare the credit risk dataset for plotting.
 
@@ -18,15 +20,17 @@ def build_plot_df(debug: bool = False) -> tuple[pd.DataFrame, list]:
                                 processed data and a list of categorical
                                 columns.
     """
-    df = pd.read_csv("data/raw_data/credit_risk_dataset.csv")
-    cat_columns = [
-        "person_home_ownership",
-        "loan_intent",
-        "loan_grade",
-        "loan_amnt",
-        "loan_status",
-        "cb_person_default_on_file",
-    ]
+    if df is None:
+        df = pd.read_csv("data/raw_data/credit_risk_dataset.csv")
+    if cat_columns is None:
+        cat_columns = [
+            "person_home_ownership",
+            "loan_intent",
+            "loan_grade",
+            "loan_amnt",
+            "loan_status",
+            "cb_person_default_on_file",
+        ]
     df = get_categorical(
         df=df,
         columns=cat_columns,
