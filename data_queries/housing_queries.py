@@ -38,6 +38,7 @@ def build_plot_df(
     if cols_to_remove is None:
         cols_to_remove = ["no", "property_name", "postal_code"]
     df = remove_columns(df=df, columns=cols_to_remove)
+    cat_columns = list(set(cat_columns) - set(cols_to_remove))
     df = get_categorical(
         df=df,
         columns=cat_columns,

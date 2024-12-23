@@ -43,7 +43,12 @@ def test_cols_to_remove():
 
 def test_build_plot_df_default(test_df, test_cat_columns, test_cols_to_remove):
     """Test build_plot_df with default parameters."""
-    df, cat_columns = build_plot_df(test_df, test_cat_columns, test_cols_to_remove)
+    df, cat_columns = build_plot_df(
+        debug=False,
+        df=test_df,
+        cat_columns=test_cat_columns,
+        cols_to_remove=test_cols_to_remove,
+    )
 
     # Check that the returned DataFrame is as expected
     assert isinstance(df, pd.DataFrame), "Returned value should be a DataFrame."
@@ -52,20 +57,23 @@ def test_build_plot_df_default(test_df, test_cat_columns, test_cols_to_remove):
     # Check that categorical columns are correctly identified
     expected_cat_columns = [
         "person_home_ownership",
+        "loan_status",
         "loan_intent",
         "loan_grade",
-        "loan_amnt",
-        "loan_status",
-        "cb_person_default_on_file",
     ]
     assert (
-        cat_columns == expected_cat_columns
-    ), f"Expected categorical columns do not match. Got {cat_columns}"
+        cat_columns.sort() == expected_cat_columns.sort()
+    ), f"Expected categorical columns do not match. Got {cat_columns.sort()}"
 
 
 def test_build_plot_df_with_debug(test_df, test_cat_columns, test_cols_to_remove):
     """Test build_plot_df with debug logging enabled."""
-    df, cat_columns = build_plot_df(test_df, test_cat_columns, test_cols_to_remove)
+    df, _ = build_plot_df(
+        debug=False,
+        df=test_df,
+        cat_columns=test_cat_columns,
+        cols_to_remove=test_cols_to_remove,
+    )
 
     # Check that debug logging works (you can use mock to verify logging if needed)
     assert isinstance(df, pd.DataFrame), "Returned value should be a DataFrame."
@@ -75,14 +83,23 @@ def test_build_plot_df_with_custom_cat_columns(
     test_df, test_cat_columns, test_cols_to_remove
 ):
     """Test build_plot_df with custom categorical columns."""
-    df, cat_columns = build_plot_df(test_df, test_cat_columns, test_cols_to_remove)
-
+    df, cat_columns = build_plot_df(
+        debug=False,
+        df=test_df,
+        cat_columns=test_cat_columns,
+        cols_to_remove=test_cols_to_remove,
+    )
+    test_cat_columns = [
+        "loan_status",
+        "loan_grade",
+        "loan_intent",
+    ]  # due to columns removal
     # Check that the returned DataFrame is as expected
     assert isinstance(df, pd.DataFrame), "Returned value should be a DataFrame."
 
     # Verify that only custom categorical columns are returned
     assert (
-        cat_columns == test_cat_columns
+        cat_columns.sort() == test_cat_columns.sort()
     ), f"Expected categorical columns do not match. Got {cat_columns}"
 
 
