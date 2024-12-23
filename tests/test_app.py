@@ -1,16 +1,10 @@
-from contextvars import copy_context
-
 import plotly.graph_objects as go
 import pytest
 import repackage
-from dash._callback_context import context_value
-from dash._utils import AttributeDict
 
 repackage.up()
 from app import (
     SCALE_OPTIONS,
-    cat_columns,
-    df,
     download_image,
     toggle_modal,
     toggle_navbar_collapse,
@@ -98,8 +92,20 @@ def test_update_graph(test_input, expected):
     assert [type(i) for i in output] == [i for i in expected]
 
 
-def test_download_image():
-    pass
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ((False, False, True, None), "output_image.svg"),
+        ((False, True, False, None), "output_image.png"),
+        ((True, False, False, None), "output_image.jpg"),
+    ],
+)
+def test_download_image(test_input, expected):
+    # TODO: mock plot
+    jpg, png, svg, data = test_input
+    _, data = update_graph("price", "sqft", "linear", "linear", "ggplot2", True)
+    output = download_image(jpg, png, svg, data)
+    assert output["filename"] == expected
 
 
 @pytest.mark.parametrize(
