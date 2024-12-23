@@ -7,6 +7,9 @@ from dash._utils import AttributeDict
 
 repackage.up()
 from app import (
+    SCALE_OPTIONS,
+    cat_columns,
+    df,
     download_image,
     toggle_modal,
     toggle_navbar_collapse,
@@ -20,8 +23,35 @@ def test_update_data_options():
     pass
 
 
-def test_update_y_axis_variables_selection():
-    output = update_y_axis_variables_selection()
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (
+            "house_type",
+            (
+                [{"label": "", "value": ""}],
+                True,
+                [{"label": "Nominal", "value": "Nominal"}],
+                "Nominal",
+            ),
+        ),
+        (
+            "price",
+            (
+                [
+                    {"label": "price", "value": "price"},
+                    {"label": "sqft", "value": "sqft"},
+                ],
+                False,
+                SCALE_OPTIONS,
+                "linear",
+            ),
+        ),
+    ],
+)
+def test_update_y_axis_variables_selection(test_input, expected):
+    output = update_y_axis_variables_selection(test_input)
+    assert output == expected
 
 
 def test_update_graph():
