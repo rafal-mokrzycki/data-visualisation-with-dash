@@ -47,7 +47,7 @@ def test_drop_outliers(sample_df):
     """Test drop_outliers function."""
     # Add outlier to column C
     sample_df.loc[5] = [6, "f", 1000]  # Adding an outlier
-    df = drop_outliers(sample_df, columns=["C"])
+    df = drop_outliers(sample_df, threshold=2, columns=["C"])
 
     # Check that the outlier is removed
     assert df.shape[0] == 5, "There should be 5 rows after dropping outliers."
