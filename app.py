@@ -27,12 +27,12 @@ PLOT_THEMES = [
     "simple_white",
     "none",
 ]
-
+PLOT_TYPES = []  # TODO: insert values
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    assets_folder="dashboard/assets",
+    external_stylesheets=[dbc.themes.VAPOR],
+    assets_folder="assets",
     prevent_initial_callbacks="initial_duplicate",
 )
 # Global variable to store the dataframe
@@ -193,24 +193,23 @@ plotting = [
                     html.H5(
                         "Download as:",
                         className="card-title",
-                        style={"marginBottom": "10px", "marginTop": "10px"},
                     ),
                     dbc.Button(
                         "JPG",
                         id="download-jpg",
-                        className="download-button",
+                        className="btn btn-light",
                         outline=True,
                     ),
                     dbc.Button(
                         "PNG",
                         id="download-png",
-                        className="download-button",
+                        className="btn btn-light",
                         outline=True,
                     ),
                     dbc.Button(
                         "SVG",
                         id="download-svg",
-                        className="download-button",
+                        className="btn btn-light",
                         outline=True,
                     ),
                     dcc.Download(id="download-image"),
@@ -234,18 +233,17 @@ sidebar = [
                     html.H5(
                         "Select dataset",
                         className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
                     ),
                     dcc.Dropdown(
                         id="dataset-selector",
                         options=DATASET_OPTIONS,
-                        value="Housing Data",  # Default value
+                        value="Housing Data",
+                        style={"color": "black"},
                     ),
                     # Title for selecting variables with spacing
                     html.H5(
                         "Select variables",
                         className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
                     ),
                     # Dropdown to select variables
                     html.Div(
@@ -267,6 +265,7 @@ sidebar = [
                                     "display": "inline-block",
                                     "marginRight": "10px",
                                     "float": "left",
+                                    "color": "black",
                                 },
                             ),
                             # Dropdown to select Y variable
@@ -289,13 +288,14 @@ sidebar = [
                                 style={
                                     "width": "48%",
                                     "display": "inline-block",
+                                    "color": "black",
                                 },
                             ),
                         ],
                         style={
                             "display": "inline",
                         },
-                    ),  # Checkbox to select trenline
+                    ),  # Checkbox to select trendline
                     html.Div(
                         [
                             dcc.Checklist(
@@ -308,66 +308,96 @@ sidebar = [
                             ),
                         ]
                     ),
-                    # Title for selecting scale with spacing
                     html.H5(
-                        "Select scale",
+                        "Select plot type",
                         className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
                     ),
-                    # Checkboxes for selecting axes scales
-                    html.Div(
-                        [
-                            # Checkbox for selecting X axis scale
-                            html.Div(
-                                [
-                                    dcc.RadioItems(
-                                        id="x-axis-scale",
-                                        options=SCALE_OPTIONS,
-                                        value="linear",
-                                        inputStyle={"marginRight": "5px"},
-                                    )
-                                ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                    "marginRight": "10px",
-                                    "float": "left",
-                                },
-                            ),
-                            # Checkbox for selecting Y axis scale
-                            html.Div(
-                                [
-                                    dcc.RadioItems(
-                                        id="y-axis-scale",
-                                        options=SCALE_OPTIONS,
-                                        value="linear",
-                                        inputStyle={"marginRight": "5px"},
-                                    )
-                                ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                },
-                            ),
-                        ],
-                        style={
-                            "display": "inline",
-                        },
-                    ),
-                    # Title for selecting color theme with spacing
-                    html.H5(
-                        "Select color theme",
-                        className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),
-                    # Dropdown for selecting the plot color theme
                     dcc.Dropdown(
-                        id="color-theme-selector",
-                        options=[
-                            {"label": theme, "value": theme} for theme in PLOT_THEMES
-                        ],
-                        value="plotly",  # Default value
-                        style={"marginBottom": "20px"},
+                        id="plot-type-selector",
+                        options=PLOT_TYPES,
+                        value="",  # TODO: choose
+                        style={"color": "black"},
+                    ),
+                    html.Div(
+                        dbc.Accordion(
+                            [
+                                dbc.AccordionItem(
+                                    [  # Title for selecting scale with spacing
+                                        html.H5(
+                                            "Select scale",
+                                            className="card-title",
+                                        ),
+                                        # Checkboxes for selecting axes scales
+                                        html.Div(
+                                            [
+                                                # Checkbox for selecting X axis scale
+                                                html.Div(
+                                                    [
+                                                        dcc.RadioItems(
+                                                            id="x-axis-scale",
+                                                            options=SCALE_OPTIONS,
+                                                            value="linear",
+                                                            inputStyle={
+                                                                "marginRight": "5px",
+                                                                "color": "white",
+                                                            },
+                                                        )
+                                                    ],
+                                                    style={
+                                                        "width": "48%",
+                                                        "display": "inline-block",
+                                                        "marginRight": "10px",
+                                                        "float": "left",
+                                                    },
+                                                ),
+                                                # Checkbox for selecting Y axis scale
+                                                html.Div(
+                                                    [
+                                                        dcc.RadioItems(
+                                                            id="y-axis-scale",
+                                                            options=SCALE_OPTIONS,
+                                                            value="linear",
+                                                            inputStyle={
+                                                                "marginRight": "5px",
+                                                            },
+                                                        )
+                                                    ],
+                                                    style={
+                                                        "width": "48%",
+                                                        "display": "inline-block",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "display": "inline",
+                                            },
+                                        ),
+                                        # Title for selecting color theme with spacing
+                                        html.H5(
+                                            "Select color theme",
+                                            className="card-title",
+                                        ),
+                                        # Dropdown for selecting the plot color theme
+                                        dcc.Dropdown(
+                                            id="color-theme-selector",
+                                            options=[
+                                                {"label": theme, "value": theme}
+                                                for theme in PLOT_THEMES
+                                            ],
+                                            value="plotly",  # Default value
+                                            style={
+                                                "marginBottom": "20px",
+                                                "color": "black",
+                                            },
+                                        ),
+                                    ],
+                                    title="Advanced options",
+                                )
+                            ],
+                            flush=True,
+                            start_collapsed=True,
+                            style={"marginTop": "20px"},
+                        )
                     ),
                 ]
             ),

@@ -19,7 +19,7 @@ pip install -r requirements.txt
 
 ```
 source .venv/bin/activate # (.venv\Scripts\activate for Windows)
-python -m  ui.app
+python -m app
 ```
 
 Go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
