@@ -12,6 +12,7 @@
     white-space: nowrap;
 }
 
+
 .card {
     margin: 1em 0 1em 0;
     min-width: auto;
@@ -28,4 +29,9 @@ label {
 
 .btn-light {
     margin-right: 10px;
+}
+.card-title {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    color: white;
 }
