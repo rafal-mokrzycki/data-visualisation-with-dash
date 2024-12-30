@@ -26,15 +26,6 @@ label {
     visibility: visible !important;
 }
 
-.download-button {
-    border-style: solid;
-    border-color: grey;
-    width: 10%;
-    display: inline-block;
+.btn-light {
     margin-right: 10px;
-    float: left;
 }
-.download-button:hover {
-    background-color: grey;
-    color: white;
-  }

@@ -31,8 +31,8 @@ PLOT_THEMES = [
 # Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    assets_folder="dashboard/assets",
+    external_stylesheets=[dbc.themes.VAPOR],
+    assets_folder="assets",
     prevent_initial_callbacks="initial_duplicate",
 )
 # Global variable to store the dataframe
@@ -198,19 +198,19 @@ plotting = [
                     dbc.Button(
                         "JPG",
                         id="download-jpg",
-                        className="download-button",
+                        className="btn btn-light",
                         outline=True,
                     ),
                     dbc.Button(
                         "PNG",
                         id="download-png",
-                        className="download-button",
+                        className="btn btn-light",
                         outline=True,
                     ),
                     dbc.Button(
                         "SVG",
                         id="download-svg",
-                        className="download-button",
+                        className="btn btn-light",
                         outline=True,
                     ),
                     dcc.Download(id="download-image"),
