@@ -11,4 +11,4 @@
 [ ] 3 variables plotting
 [ ] 3D plotting
 [ ] Change plot colors feature
-[ ] Add tests
+[x] Add tests
