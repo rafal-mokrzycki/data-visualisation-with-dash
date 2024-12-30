@@ -4,7 +4,7 @@ import pytest
 import repackage
 
 repackage.up()
-from utils.data_manipulation import (  # Replace with your actual module name
+from utils.data_manipulation import (
     drop_outliers,
     get_categorical,
     process_null_values,
