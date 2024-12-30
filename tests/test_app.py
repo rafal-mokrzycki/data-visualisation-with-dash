@@ -4,7 +4,6 @@ import repackage
 
 repackage.up()
 from app import (
-    SCALE_OPTIONS,
     download_image,
     toggle_modal,
     toggle_navbar_collapse,
@@ -12,6 +11,7 @@ from app import (
     update_graph,
     update_y_axis_variables_selection,
 )
+from utils.constants import SCALE_OPTIONS
 
 
 @pytest.mark.parametrize(
