@@ -103,7 +103,7 @@ sidebar = [
                     dcc.Dropdown(
                         id="plot-type-selector",
                         options=PLOT_TYPES,
-                        value="",  # TODO: choose
+                        value="scatter",
                         style={"color": "black"},
                     ),
                     html.Div(

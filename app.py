@@ -105,6 +105,7 @@ def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bo
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
     Input("scatter-plot-trendline", "value"),
+    Input("plot-type-selector", "value"),
 )
 def update_graph(
     x_axis: str,
@@ -113,45 +114,80 @@ def update_graph(
     y_scale: str,
     color_theme: str,
     trendline: list,
+    plot_type: str,
 ) -> tuple[go.Figure, str]:
+    # OPTIONS:
 
     if x_axis in cat_columns:
-        df_count = df[x_axis].value_counts().reset_index()
-        df_count.columns = [x_axis, "count"]
-        fig = px.bar(df_count, x=x_axis, y="count")
-        if y_scale == "log":
-            fig.update_yaxes(type="log")
-        fig.update_layout(
-            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title="Count",
-            template=color_theme,
-        )
-    else:
-        if trendline:
-            fig = px.scatter(
-                df,
-                x=x_axis,
-                y=y_axis,
-                text=x_axis,
-                trendline="ols",
-                trendline_color_override="red",
-            )
+        if plot_type == "bar":
+            if y_axis in cat_columns:
+                # bar plot (2 variables - categorical + categorical)
+                # TODO: implement
+                pass
+            elif y_axis == "None":  # TODO: choose more descriptive category
+                # bar plot (1 variable - categorical)
+                df_count = df[x_axis].value_counts().reset_index()
+                df_count.columns = [x_axis, "count"]
+                fig = px.bar(df_count, x=x_axis, y="count")
+                if y_scale == "log":
+                    fig.update_yaxes(type="log")
+                fig.update_layout(
+                    title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
+                    title_x=0.5,
+                    xaxis_title=x_axis,
+                    yaxis_title="Count",
+                    template=color_theme,
+                )
+            else:
+                raise ValueError("Wrong variable.")
+
+        elif plot_type == "pie":
+            # pie plot (1 variable - categorical)
+            # TODO: implement
+            pass
+        elif plot_type == "box":
+            # box plot (2 variables - categorical + continuous)
+            # TODO: implement
+            pass
         else:
-            fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
+            raise ValueError("Wrong plot type.")
+    else:
+        if plot_type == "scatter":
+            # scatter plot (2 variables - continuous + continuous)
+            if trendline:
+                fig = px.scatter(
+                    df,
+                    x=x_axis,
+                    y=y_axis,
+                    text=x_axis,
+                    trendline="ols",
+                    trendline_color_override="red",
+                )
+            else:
+                fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
 
-        fig.update_traces(textposition="top center")
-        fig.update_xaxes(type=x_scale)
-        fig.update_yaxes(type=y_scale)
-        fig.update_layout(
-            title=dict(text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title=y_axis,
-            template=color_theme,
-        )
-
+            fig.update_traces(textposition="top center")
+            fig.update_xaxes(type=x_scale)
+            fig.update_yaxes(type=y_scale)
+            fig.update_layout(
+                title=dict(
+                    text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)
+                ),
+                title_x=0.5,
+                xaxis_title=x_axis,
+                yaxis_title=y_axis,
+                template=color_theme,
+            )
+        elif plot_type == "histogram":
+            # histogram (1 variable - continuous)
+            # TODO: implement
+            pass
+        elif plot_type == "box":
+            #  plot (1 variable - continuous)
+            # TODO: implement
+            pass
+        else:
+            raise ValueError("Wrong plot type.")
     return fig, fig.to_json()
 
 

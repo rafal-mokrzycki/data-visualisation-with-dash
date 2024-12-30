@@ -16,4 +16,4 @@ PLOT_THEMES = [
     "simple_white",
     "none",
 ]
-PLOT_TYPES = []  # TODO: insert values
+PLOT_TYPES = ["scatter", "bar", "histogram", "box", "pie"]
