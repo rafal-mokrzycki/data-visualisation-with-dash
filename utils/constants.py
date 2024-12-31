@@ -7,6 +7,10 @@ SCALE_OPTIONS = [
     {"label": "Linear", "value": "linear"},
     {"label": "Logarithmic", "value": "log"},
 ]
+SCALE_OPTIONS_BOTH_DISABLED = [
+    {"label": "Linear", "value": "linear", "disabled": True},
+    {"label": "Logarithmic", "value": "log", "disabled": True},
+]
 PLOT_THEMES = [
     "plotly",
     "plotly_white",

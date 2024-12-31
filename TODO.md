@@ -9,8 +9,8 @@
 [x] Add a switch to plot either of the two datasets
 [x] Trendline feature
 [x] Implement different type of charts display
-[ ] Add callbacks for different chart and variable combinations
-[ ] Rollback logarithmic scale feature
+[x] Add callbacks for different chart and variable combinations
+[x] Rollback logarithmic scale feature
 [ ] 3 variables plotting
 [ ] 3D plotting
 [ ] Change plot colors feature
