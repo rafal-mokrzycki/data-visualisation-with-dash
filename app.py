@@ -127,14 +127,19 @@ def update_both_axes_variables_selection_and_scale_options(
         y_scale = [{"label": "Nominal", "value": "Nominal"}]
 
     elif plot_type == "box":
-        pass
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        x_scale = [{"label": "Nominal", "value": "Nominal"}]
+        y_scale = SCALE_OPTIONS
     elif plot_type == "histogram":
         x_columns = [
             {"label": col, "value": col} for col in df.columns if col not in cat_columns
         ]
         y_columns = [{"label": "", "value": ""}]
-        x_scale = SCALE_OPTIONS
-        y_scale = [{"label": "Nominal", "value": "Nominal"}]
+        x_scale = [{"label": "Nominal", "value": "Nominal"}]
+        y_scale = SCALE_OPTIONS
 
     elif plot_type == "scatter":
         x_columns = [
@@ -176,7 +181,7 @@ def update_both_axes_variables_selection_and_scale_options(
     Output("stored-figure", "data"),
     Input("x-axis-selector", "value"),
     Input("y-axis-selector", "value"),
-    Input("x-axis-scale", "value"),
+    Input("x-axis-scale", "value"),  # TODO: doesn't work for histogram, boxplot
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
     Input("scatter-plot-trendline", "value"),
