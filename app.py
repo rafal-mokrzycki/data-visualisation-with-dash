@@ -95,6 +95,81 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
 #     )
 
 
+@app.callback(
+    Output("x-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "disabled", allow_duplicate=True),
+    Output("x-axis-scale", "options", allow_duplicate=True),
+    Output("y-axis-scale", "options", allow_duplicate=True),
+    Input("plot-type-selector", "value"),
+)
+def update_both_axes_variables_selection_and_scale_options(
+    plot_type: str,
+) -> tuple[list, bool, list, bool]:
+    y_disabled = False
+    if plot_type == "bar":  # TODO: fix
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ].insert(0, {"label": "(plot only one variable)", "value": None})
+        x_scale = [{"label": "Nominal", "value": "Nominal"}]
+        y_scale = SCALE_OPTIONS
+
+    elif plot_type == "pie":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        y_disabled = True
+        x_scale = [{"label": "Nominal", "value": "Nominal"}]
+        y_scale = [{"label": "Nominal", "value": "Nominal"}]
+
+    elif plot_type == "box":
+        pass
+    elif plot_type == "histogram":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        x_scale = SCALE_OPTIONS
+        y_scale = [{"label": "Nominal", "value": "Nominal"}]
+
+    elif plot_type == "scatter":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        x_scale = SCALE_OPTIONS
+        y_scale = SCALE_OPTIONS
+
+    else:
+        raise ValueError("Something went wrong.")
+    return (
+        x_columns,
+        y_columns,
+        y_disabled,
+        x_scale,
+        y_scale,
+    )
+    # if x_axis in cat_columns:
+    #     return (
+    #         [{"label": "", "value": ""}],
+    #         True,
+    #         [{"label": "Nominal", "value": "Nominal"}],
+    #         "Nominal",
+    #     )
+    # return (
+    #     [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
+    #     False,
+    #     SCALE_OPTIONS,
+    #     "linear",
+    # )
+
+
 # Callback to update graph and store its figure data
 @app.callback(
     Output("graph-output", "figure"),
@@ -138,7 +213,7 @@ def update_graph(
                     yaxis_title="Count",
                     template=color_theme,
                 )
-            elif y_axis == "None":  # TODO: choose more descriptive category
+            elif y_axis is None:
                 # bar plot (1 variable - categorical)
                 df_count = df[x_axis].value_counts().reset_index()
                 df_count.columns = [x_axis, "count"]
