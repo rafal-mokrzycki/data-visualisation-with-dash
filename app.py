@@ -88,11 +88,12 @@ def update_both_axes_variables_selection_and_scale_options(
         x_columns = [
             {"label": col, "value": col} for col in df.columns if col in cat_columns
         ]
-        # y_columns = [
-        #     {"label": col, "value": col} for col in df.columns if col in cat_columns
-        # ].insert(0, {"label": "(plot only one variable)", "value": "NONE"})
-        y_columns = []
-        y_disabled = True
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        # Add element needed for one variable plot at the beginning of the list
+        y_columns.insert(0, {"label": "(plot only one variable)", "value": "NONE"})
+        y_disabled = False
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
 
@@ -137,8 +138,7 @@ def update_both_axes_variables_selection_and_scale_options(
         x_columns,
         x_columns[0]["value"],
         y_columns,
-        # y_columns[0]["value"],
-        "",
+        y_columns[0]["value"],
         y_disabled,
         x_scale,
         y_scale,
