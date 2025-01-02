@@ -12,7 +12,8 @@ from templates.description import description
 from templates.header import header
 from templates.plotting import plotting
 from templates.sidebar import sidebar
-from utils.constants import SCALE_OPTIONS
+from utils.constants import SCALE_OPTIONS, SCALE_OPTIONS_BOTH_DISABLED
+from utils.display import update_plot_layouts
 
 # Global variable to store the dataframe
 df, cat_columns = get_dataframe_to_plot()
@@ -58,7 +59,9 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     df, cat_columns = get_dataframe_to_plot(selected_dataset)
 
     # Generate options for x and y axis selectors based on dataframe columns
-    x_options = [{"label": col, "value": col} for col in df.columns]
+    x_options = [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
+    ]
     y_options = [
         {"label": col, "value": col} for col in df.columns if col not in cat_columns
     ]
@@ -71,27 +74,78 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     )
 
 
-# Combined callback for Y axis options and disabled state based on selected X axis
 @app.callback(
+    Output("x-axis-selector", "options", allow_duplicate=True),
+    Output("x-axis-selector", "value", allow_duplicate=True),
     Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "value", allow_duplicate=True),
     Output("y-axis-selector", "disabled", allow_duplicate=True),
     Output("x-axis-scale", "options", allow_duplicate=True),
-    Output("x-axis-scale", "value", allow_duplicate=True),
-    Input("x-axis-selector", "value"),
+    Output("y-axis-scale", "options", allow_duplicate=True),
+    Input("plot-type-selector", "value"),
 )
-def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bool]:
-    if x_axis in cat_columns:
-        return (
-            [{"label": "", "value": ""}],
-            True,
-            [{"label": "Nominal", "value": "Nominal"}],
-            "Nominal",
-        )
+def update_both_axes_variables_selection_and_scale_options(
+    plot_type: str,
+) -> tuple[list, bool, list, bool]:
+    if plot_type == "bar":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        y_columns = [{"label": "(plot only one variable)", "value": "no_value"}]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS
+
+    elif plot_type == "pie":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        y_disabled = True
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS_BOTH_DISABLED
+
+    elif plot_type == "box":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        x_columns.insert(0, {"label": "(plot only one variable)", "value": "no_value"})
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS
+    elif plot_type == "histogram":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS
+
+    elif plot_type == "scatter":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS
+        y_scale = SCALE_OPTIONS
+
+    else:
+        raise ValueError("Something went wrong.")
     return (
-        [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
-        False,
-        SCALE_OPTIONS,
-        "linear",
+        x_columns,
+        x_columns[0]["value"],
+        y_columns,
+        y_columns[0]["value"],
+        y_disabled,
+        x_scale,
+        y_scale,
     )
 
 
@@ -105,6 +159,7 @@ def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bo
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
     Input("scatter-plot-trendline", "value"),
+    Input("plot-type-selector", "value"),
 )
 def update_graph(
     x_axis: str,
@@ -113,22 +168,77 @@ def update_graph(
     y_scale: str,
     color_theme: str,
     trendline: list,
+    plot_type: str,
 ) -> tuple[go.Figure, str]:
-
-    if x_axis in cat_columns:
+    if plot_type == "bar":
+        # bar plot (1 variable - categorical)
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
         fig = px.bar(df_count, x=x_axis, y="count")
-        if y_scale == "log":
-            fig.update_yaxes(type="log")
-        fig.update_layout(
-            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title="Count",
-            template=color_theme,
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
-    else:
+
+    elif plot_type == "pie":
+        # pie plot (1 variable - categorical)
+        df_grouped = df.groupby(x_axis).size().reset_index(name="count")
+
+        fig = px.pie(
+            df_grouped,
+            names=x_axis,
+            values="count",
+        )
+
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
+        )
+    elif plot_type == "box":
+        # box plot (2 variables - categorical + continuous)
+        try:
+            fig = px.box(
+                df,
+                x=x_axis,  # Categorical variable for x-axis
+                y=y_axis,  # Numerical variable for y-axis
+                # color="y_axis",  # Categorical variable for color differentiation
+            )
+            update_plot_layouts(
+                plot_type,
+                fig,
+                x_axis=x_axis,
+                y_axis=y_axis,
+                x_scale=x_scale,
+                y_scale=y_scale,
+                color_theme=color_theme,
+            )
+        except ValueError:
+            #  plot (1 variable - continuous)
+            fig = px.box(
+                df,
+                y=y_axis,
+            )
+            update_plot_layouts(
+                plot_type,
+                fig,
+                x_axis=None,
+                y_axis=y_axis,
+                x_scale=x_scale,
+                y_scale=y_scale,
+                color_theme=color_theme,
+            )
+    elif plot_type == "scatter":
+        # scatter plot (2 variables - continuous + continuous)
         if trendline:
             fig = px.scatter(
                 df,
@@ -140,18 +250,37 @@ def update_graph(
             )
         else:
             fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
-
-        fig.update_traces(textposition="top center")
-        fig.update_xaxes(type=x_scale)
-        fig.update_yaxes(type=y_scale)
-        fig.update_layout(
-            title=dict(text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title=y_axis,
-            template=color_theme,
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
 
+    elif plot_type == "histogram":
+        # histogram (1 variable - continuous)
+        fig = px.histogram(
+            df,
+            x=x_axis,
+            title=f"Histogram of {x_axis}",
+            labels={"value": x_axis},
+            nbins=10,
+        )
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
+        )
+
+    else:
+        raise ValueError("Wrong plot type.")
     return fig, fig.to_json()
 
 

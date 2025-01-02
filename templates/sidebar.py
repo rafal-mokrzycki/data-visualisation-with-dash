@@ -28,6 +28,16 @@ sidebar = [
                         value="Housing Data",
                         style={"color": "black"},
                     ),
+                    html.H5(
+                        "Select plot type",
+                        className="card-title",
+                    ),
+                    dcc.Dropdown(
+                        id="plot-type-selector",
+                        options=PLOT_TYPES,
+                        value="scatter",
+                        style={"color": "black"},
+                    ),
                     # Title for selecting variables with spacing
                     html.H5(
                         "Select variables",
@@ -95,16 +105,6 @@ sidebar = [
                                 inputStyle={"marginRight": "5px"},
                             ),
                         ]
-                    ),
-                    html.H5(
-                        "Select plot type",
-                        className="card-title",
-                    ),
-                    dcc.Dropdown(
-                        id="plot-type-selector",
-                        options=PLOT_TYPES,
-                        value="",  # TODO: choose
-                        style={"color": "black"},
                     ),
                     html.Div(
                         dbc.Accordion(
