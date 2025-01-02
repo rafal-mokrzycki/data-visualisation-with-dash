@@ -209,35 +209,53 @@ def update_graph(
                 y=y_axis,  # Numerical variable for y-axis
                 # color="y_axis",  # Categorical variable for color differentiation
             )
-
-            fig.update_yaxes(type=y_scale)
-
-            fig.update_layout(
-                title=dict(
-                    text=f"Box Plot: distribution of {y_axis} by categories of {x_axis}",
-                    font=dict(size=24),
-                ),
-                title_x=0.5,
-                xaxis_title=f"Categories of {x_axis}",
-                yaxis_title=f"Distribution of {y_axis}",
+            update_plot_layouts(
+                plot_type,
+                fig,
+                x_axis=x_axis,
+                y_axis=y_axis,
+                x_scale=x_scale,
+                y_scale=y_scale,
+                color_theme=color_theme,
             )
+
+            # fig.update_yaxes(type=y_scale)
+
+            # fig.update_layout(
+            #     title=dict(
+            #         text=f"Box Plot: distribution of {y_axis} by categories of {x_axis}",
+            #         font=dict(size=24),
+            #     ),
+            #     title_x=0.5,
+            #     xaxis_title=f"Categories of {x_axis}",
+            #     yaxis_title=f"Distribution of {y_axis}",
+            # )
         except ValueError:
             #  plot (1 variable - continuous)
             fig = px.box(
                 df,
                 y=y_axis,
             )
-
-            fig.update_yaxes(type=y_scale)
-
-            fig.update_layout(
-                title=dict(
-                    text=f"Box Plot: distribution of {y_axis}",
-                    font=dict(size=24),
-                ),
-                title_x=0.5,
-                yaxis_title=f"Distribution of {y_axis}",
+            update_plot_layouts(
+                plot_type,
+                fig,
+                x_axis=None,
+                y_axis=y_axis,
+                x_scale=x_scale,
+                y_scale=y_scale,
+                color_theme=color_theme,
             )
+
+            # fig.update_yaxes(type=y_scale)
+
+            # fig.update_layout(
+            #     title=dict(
+            #         text=f"Box Plot: distribution of {y_axis}",
+            #         font=dict(size=24),
+            #     ),
+            #     title_x=0.5,
+            #     yaxis_title=f"Distribution of {y_axis}",
+            # )
 
     elif plot_type == "scatter":
         # scatter plot (2 variables - continuous + continuous)
@@ -252,17 +270,16 @@ def update_graph(
             )
         else:
             fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
-
-        fig.update_traces(textposition="top center")
-        fig.update_xaxes(type=x_scale)
-        fig.update_yaxes(type=y_scale)
-        fig.update_layout(
-            title=dict(text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title=y_axis,
-            template=color_theme,
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
+
     elif plot_type == "histogram":
         # histogram (1 variable - continuous)
         fig = px.histogram(
@@ -272,16 +289,14 @@ def update_graph(
             labels={"value": x_axis},
             nbins=10,
         )
-        fig.update_yaxes(type=y_scale)
-
-        fig.update_layout(
-            title=dict(
-                text="Histogram: Distribution of Continuous Variable",
-                font=dict(size=24),
-            ),
-            title_x=0.5,
-            xaxis_title="Value",
-            yaxis_title="Count",
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
 
     else:
