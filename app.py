@@ -59,8 +59,12 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     df, cat_columns = get_dataframe_to_plot(selected_dataset)
 
     # Generate options for x and y axis selectors based on dataframe columns
-    x_options = [{"label": col, "value": col} for col in df.columns]
-    y_options = [{"label": col, "value": col} for col in df.columns]
+    x_options = [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
+    ]
+    y_options = [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
+    ]
 
     return (
         x_options,
@@ -218,18 +222,6 @@ def update_graph(
                 y_scale=y_scale,
                 color_theme=color_theme,
             )
-
-            # fig.update_yaxes(type=y_scale)
-
-            # fig.update_layout(
-            #     title=dict(
-            #         text=f"Box Plot: distribution of {y_axis} by categories of {x_axis}",
-            #         font=dict(size=24),
-            #     ),
-            #     title_x=0.5,
-            #     xaxis_title=f"Categories of {x_axis}",
-            #     yaxis_title=f"Distribution of {y_axis}",
-            # )
         except ValueError:
             #  plot (1 variable - continuous)
             fig = px.box(
@@ -245,18 +237,6 @@ def update_graph(
                 y_scale=y_scale,
                 color_theme=color_theme,
             )
-
-            # fig.update_yaxes(type=y_scale)
-
-            # fig.update_layout(
-            #     title=dict(
-            #         text=f"Box Plot: distribution of {y_axis}",
-            #         font=dict(size=24),
-            #     ),
-            #     title_x=0.5,
-            #     yaxis_title=f"Distribution of {y_axis}",
-            # )
-
     elif plot_type == "scatter":
         # scatter plot (2 variables - continuous + continuous)
         if trendline:
