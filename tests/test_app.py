@@ -22,6 +22,7 @@ from app import (
                 [
                     {"label": "price", "value": "price"},
                     {"label": "sqft", "value": "sqft"},
+
                 ],
                 [
                     {"label": "price", "value": "price"},
@@ -123,7 +124,6 @@ def test_update_graph(test_input, expected):
     ],
 )
 def test_download_image(test_input, expected):
-    # TODO: mock plot
     jpg, png, svg, data, plot_type = test_input
     _, data = update_graph(
         "price",
