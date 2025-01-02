@@ -8,372 +8,24 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 from data.get_data import get_dataframe_to_plot
+from templates.description import description
+from templates.header import header
+from templates.plotting import plotting
+from templates.sidebar import sidebar
+from utils.constants import SCALE_OPTIONS, SCALE_OPTIONS_BOTH_DISABLED
+from utils.display import update_plot_layouts
 
-DATASETS = ["Housing Data", "Credit Risk"]
-DATASET_OPTIONS = [
-    {"label": "Housing Data", "value": "Housing Data"},
-    {"label": "Credit Risk", "value": "Credit Risk"},
-]
-SCALE_OPTIONS = [
-    {"label": "Linear", "value": "linear"},
-    {"label": "Logarithmic", "value": "log"},
-]
-PLOT_THEMES = [
-    "plotly",
-    "plotly_white",
-    "plotly_dark",
-    "ggplot2",
-    "seaborn",
-    "simple_white",
-    "none",
-]
+# Global variable to store the dataframe
+df, cat_columns = get_dataframe_to_plot()
 
-# Initialize the Dash app with suppress_callback_exceptions
 app = dash.Dash(
     __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    assets_folder="dashboard/assets",
+    external_stylesheets=[dbc.themes.VAPOR],
+    assets_folder="assets",
     prevent_initial_callbacks="initial_duplicate",
 )
 # Global variable to store the dataframe
 df, cat_columns = get_dataframe_to_plot()
-
-# Modal
-with open("EXPLANATIONS.md", "r") as f:
-    howto_md = f.read()
-
-modal_overlay = dbc.Modal(
-    [
-        dbc.ModalBody(html.Div([dcc.Markdown(howto_md)], id="howto-md")),
-        dbc.ModalFooter(dbc.Button("Close", id="howto-close", className="howto-bn")),
-    ],
-    id="modal",
-    size="lg",
-)
-button_howto = dbc.Button(
-    "Learn more",
-    id="howto-open",
-    outline=True,
-    color="info",
-    # Turn off lowercase transformation for class .button in stylesheet
-    style={"textTransform": "none", "marginRight": "10px"},
-)
-
-button_github = dbc.Button(
-    "View Code on github",
-    outline=True,
-    color="primary",
-    href="https://github.com/rafal-mokrzycki/dash-pandas/",
-    id="gh-link",
-    style={"text-transform": "none"},
-    target="_blank",
-)
-
-
-# Header
-header = dbc.Navbar(
-    dbc.Container(
-        [
-            dbc.Row(
-                [
-                    dbc.Col(
-                        html.Img(
-                            id="logo",
-                            src="assets/dash-logo-new.png",
-                            height="30px",
-                        ),
-                        md="auto",
-                    ),
-                    dbc.Col(
-                        [
-                            html.Div(
-                                [
-                                    html.H3("Interactive Plots"),
-                                    html.P("Economic data"),
-                                ],
-                                id="app-title",
-                            )
-                        ],
-                        md=True,
-                        align="center",
-                    ),
-                ],
-                align="center",
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(
-                        [
-                            dbc.NavbarToggler(id="navbar-toggler"),
-                            dbc.Collapse(
-                                dbc.Nav(
-                                    [
-                                        dbc.NavItem(button_howto),
-                                        dbc.NavItem(button_github),
-                                    ],
-                                    navbar=True,
-                                ),
-                                id="navbar-collapse",
-                                navbar=True,
-                            ),
-                            modal_overlay,
-                        ],
-                        md=2,
-                    ),
-                ],
-                align="center",
-            ),
-        ],
-        fluid=True,
-    ),
-    dark=True,
-    color="dark",
-    sticky="top",
-)
-
-# Description
-description = dbc.Col(
-    [
-        dbc.Card(
-            id="description-card",
-            children=[
-                dbc.CardHeader("Explanation"),
-                dbc.CardBody(
-                    [
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        html.Img(
-                                            src="assets/economic_data_img_example.png",
-                                            width="200px",
-                                        )
-                                    ],
-                                    md="auto",
-                                ),
-                                dbc.Col(
-                                    html.P(
-                                        "This is an example of an interactive economic data plotter that allows users to visualize two datasets through bar plots and scatter plots. "  # noqa: E501
-                                        "Users can enhance their scatter plots by adding linear trendlines, providing valuable insights into data trends and relationships. "  # noqa: E501
-                                        "The application offers customizable color schemes, enabling users to tailor the visual appearance of their plots to better suit their presentation needs. "  # noqa: E501
-                                        "Additionally, users have the option to download their visualizations in multiple formats, including PNG, JPG, and SVG, ensuring compatibility with various applications and platforms. "  # noqa: E501
-                                        "This tool aims to facilitate data analysis and improve the accessibility of economic data visualization for users of all skill levels. "  # noqa: E501
-                                    ),
-                                    md=True,
-                                ),
-                            ]
-                        ),
-                    ]
-                ),
-            ],
-        )
-    ],
-    md=12,
-)
-
-# Data Plotting
-plotting = [
-    dbc.Card(
-        id="plotting-card",
-        children=[
-            dbc.CardHeader("Viewer"),
-            dbc.CardBody(
-                [
-                    html.Div(
-                        [
-                            # Graph output
-                            dcc.Graph(id="graph-output"),
-                            dcc.Store(id="stored-figure"),
-                        ]
-                    ),
-                ]
-            ),
-            dbc.CardFooter(
-                [
-                    html.H5(
-                        "Download as:",
-                        className="card-title",
-                        style={"marginBottom": "10px", "marginTop": "10px"},
-                    ),
-                    dbc.Button(
-                        "JPG",
-                        id="download-jpg",
-                        className="download-button",
-                        outline=True,
-                    ),
-                    dbc.Button(
-                        "PNG",
-                        id="download-png",
-                        className="download-button",
-                        outline=True,
-                    ),
-                    dbc.Button(
-                        "SVG",
-                        id="download-svg",
-                        className="download-button",
-                        outline=True,
-                    ),
-                    dcc.Download(id="download-image"),
-                ],
-                style={
-                    "display": "inline",
-                },
-            ),
-        ],
-    )
-]
-
-# Sidebar
-sidebar = [
-    dbc.Card(
-        id="sidebar-card",
-        children=[
-            dbc.CardHeader("Tools"),
-            dbc.CardBody(
-                [
-                    html.H5(
-                        "Select dataset",
-                        className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),
-                    dcc.Dropdown(
-                        id="dataset-selector",
-                        options=DATASET_OPTIONS,
-                        value="Housing Data",  # Default value
-                    ),
-                    # Title for selecting variables with spacing
-                    html.H5(
-                        "Select variables",
-                        className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),
-                    # Dropdown to select variables
-                    html.Div(
-                        [
-                            # Dropdown to select X variable
-                            html.Div(
-                                [
-                                    dcc.Dropdown(
-                                        id="x-axis-selector",
-                                        options=[
-                                            {"label": col, "value": col}
-                                            for col in df.columns
-                                        ],
-                                        value=df.columns.values.tolist()[0],
-                                    ),
-                                ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                    "marginRight": "10px",
-                                    "float": "left",
-                                },
-                            ),
-                            # Dropdown to select Y variable
-                            html.Div(
-                                [
-                                    dcc.Dropdown(
-                                        id="y-axis-selector",
-                                        options=[
-                                            {"label": col, "value": col}
-                                            for col in df.columns
-                                            if col not in cat_columns
-                                        ],
-                                        value=df[
-                                            df.columns.difference(cat_columns)
-                                        ].columns.values.tolist()[
-                                            0
-                                        ],  # Default value
-                                    ),
-                                ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                },
-                            ),
-                        ],
-                        style={
-                            "display": "inline",
-                        },
-                    ),  # Checkbox to select trenline
-                    html.Div(
-                        [
-                            dcc.Checklist(
-                                id="scatter-plot-trendline",
-                                options=[
-                                    {"label": "Show Trendline", "value": "trendline"}
-                                ],
-                                value=[],  # Default value (unchecked)
-                                inputStyle={"marginRight": "5px"},
-                            ),
-                        ]
-                    ),
-                    # Title for selecting scale with spacing
-                    html.H5(
-                        "Select scale",
-                        className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),
-                    # Checkboxes for selecting axes scales
-                    html.Div(
-                        [
-                            # Checkbox for selecting X axis scale
-                            html.Div(
-                                [
-                                    dcc.RadioItems(
-                                        id="x-axis-scale",
-                                        options=SCALE_OPTIONS,
-                                        value="linear",
-                                        inputStyle={"marginRight": "5px"},
-                                    )
-                                ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                    "marginRight": "10px",
-                                    "float": "left",
-                                },
-                            ),
-                            # Checkbox for selecting Y axis scale
-                            html.Div(
-                                [
-                                    dcc.RadioItems(
-                                        id="y-axis-scale",
-                                        options=SCALE_OPTIONS,
-                                        value="linear",
-                                        inputStyle={"marginRight": "5px"},
-                                    )
-                                ],
-                                style={
-                                    "width": "48%",
-                                    "display": "inline-block",
-                                },
-                            ),
-                        ],
-                        style={
-                            "display": "inline",
-                        },
-                    ),
-                    # Title for selecting color theme with spacing
-                    html.H5(
-                        "Select color theme",
-                        className="card-title",
-                        style={"marginBottom": "20px", "marginTop": "20px"},
-                    ),
-                    # Dropdown for selecting the plot color theme
-                    dcc.Dropdown(
-                        id="color-theme-selector",
-                        options=[
-                            {"label": theme, "value": theme} for theme in PLOT_THEMES
-                        ],
-                        value="plotly",  # Default value
-                        style={"marginBottom": "20px"},
-                    ),
-                ]
-            ),
-        ],
-    ),
-]
 
 
 app.layout = html.Div(
@@ -395,7 +47,6 @@ app.layout = html.Div(
 
 # Callback to update dataframe based on user selection
 @app.callback(
-    # Output("output-container", "children"),
     Output("x-axis-selector", "options", allow_duplicate=True),
     Output("y-axis-selector", "options", allow_duplicate=True),
     Output("x-axis-selector", "value", allow_duplicate=True),
@@ -403,14 +54,14 @@ app.layout = html.Div(
     Input("dataset-selector", "value"),
 )
 def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
-    global df  # Declare df as global to modify it
+    global df
     global cat_columns
-    df, cat_columns = get_dataframe_to_plot(
-        selected_dataset
-    )  # Update df based on selection
+    df, cat_columns = get_dataframe_to_plot(selected_dataset)
 
     # Generate options for x and y axis selectors based on dataframe columns
-    x_options = [{"label": col, "value": col} for col in df.columns]
+    x_options = [
+        {"label": col, "value": col} for col in df.columns if col not in cat_columns
+    ]
     y_options = [
         {"label": col, "value": col} for col in df.columns if col not in cat_columns
     ]
@@ -423,41 +74,92 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     )
 
 
-# Combined callback for Y axis options and disabled state based on selected X axis
 @app.callback(
+    Output("x-axis-selector", "options", allow_duplicate=True),
+    Output("x-axis-selector", "value", allow_duplicate=True),
     Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "value", allow_duplicate=True),
     Output("y-axis-selector", "disabled", allow_duplicate=True),
     Output("x-axis-scale", "options", allow_duplicate=True),
-    Output("x-axis-scale", "value", allow_duplicate=True),
-    # Output("x-axis-scale", "disabled", allow_duplicate=True),
-    Input("x-axis-selector", "value"),
+    Output("y-axis-scale", "options", allow_duplicate=True),
+    Input("plot-type-selector", "value"),
 )
-def update_y_axis_variables_selection(x_axis: str) -> tuple[list, bool, list, bool]:
-    if x_axis in cat_columns:
-        return (
-            [{"label": "", "value": ""}],
-            True,
-            [{"label": "Nominal", "value": "Nominal"}],
-            "Nominal",
-        )  # Hide Y axis selector if categorical
+def update_both_axes_variables_selection_and_scale_options(
+    plot_type: str,
+) -> tuple[list, bool, list, bool]:
+    if plot_type == "bar":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        y_columns = [{"label": "(plot only one variable)", "value": "no_value"}]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS
+
+    elif plot_type == "pie":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        y_disabled = True
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS_BOTH_DISABLED
+
+    elif plot_type == "box":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        x_columns.insert(0, {"label": "(plot only one variable)", "value": "no_value"})
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS
+    elif plot_type == "histogram":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [{"label": "", "value": ""}]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS_BOTH_DISABLED
+        y_scale = SCALE_OPTIONS
+
+    elif plot_type == "scatter":
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
+        y_disabled = False
+        x_scale = SCALE_OPTIONS
+        y_scale = SCALE_OPTIONS
+
+    else:
+        raise ValueError("Something went wrong.")
     return (
-        [{"label": col, "value": col} for col in df.columns if col not in cat_columns],
-        False,
-        SCALE_OPTIONS,
-        "linear",
-    )  # Show it otherwise
+        x_columns,
+        x_columns[0]["value"],
+        y_columns,
+        y_columns[0]["value"],
+        y_disabled,
+        x_scale,
+        y_scale,
+    )
 
 
 # Callback to update graph and store its figure data
 @app.callback(
     Output("graph-output", "figure"),
-    Output("stored-figure", "data"),  # Store figure data in JSON format
+    Output("stored-figure", "data"),
     Input("x-axis-selector", "value"),
     Input("y-axis-selector", "value"),
     Input("x-axis-scale", "value"),
     Input("y-axis-scale", "value"),
     Input("color-theme-selector", "value"),
-    Input("scatter-plot-trendline", "value"),  # New input for trendline checkbox
+    Input("scatter-plot-trendline", "value"),
+    Input("plot-type-selector", "value"),
 )
 def update_graph(
     x_axis: str,
@@ -466,22 +168,77 @@ def update_graph(
     y_scale: str,
     color_theme: str,
     trendline: list,
+    plot_type: str,
 ) -> tuple[go.Figure, str]:
-
-    if x_axis in cat_columns:
+    if plot_type == "bar":
+        # bar plot (1 variable - categorical)
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
         fig = px.bar(df_count, x=x_axis, y="count")
-        if y_scale == "log":
-            fig.update_yaxes(type="log")
-        fig.update_layout(
-            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title="Count",
-            template=color_theme,
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
-    else:
+
+    elif plot_type == "pie":
+        # pie plot (1 variable - categorical)
+        df_grouped = df.groupby(x_axis).size().reset_index(name="count")
+
+        fig = px.pie(
+            df_grouped,
+            names=x_axis,
+            values="count",
+        )
+
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
+        )
+    elif plot_type == "box":
+        # box plot (2 variables - categorical + continuous)
+        try:
+            fig = px.box(
+                df,
+                x=x_axis,  # Categorical variable for x-axis
+                y=y_axis,  # Numerical variable for y-axis
+                # color="y_axis",  # Categorical variable for color differentiation
+            )
+            update_plot_layouts(
+                plot_type,
+                fig,
+                x_axis=x_axis,
+                y_axis=y_axis,
+                x_scale=x_scale,
+                y_scale=y_scale,
+                color_theme=color_theme,
+            )
+        except ValueError:
+            #  plot (1 variable - continuous)
+            fig = px.box(
+                df,
+                y=y_axis,
+            )
+            update_plot_layouts(
+                plot_type,
+                fig,
+                x_axis=None,
+                y_axis=y_axis,
+                x_scale=x_scale,
+                y_scale=y_scale,
+                color_theme=color_theme,
+            )
+    elif plot_type == "scatter":
+        # scatter plot (2 variables - continuous + continuous)
         if trendline:
             fig = px.scatter(
                 df,
@@ -493,19 +250,38 @@ def update_graph(
             )
         else:
             fig = px.scatter(df, x=x_axis, y=y_axis, text=x_axis)
-
-        fig.update_traces(textposition="top center")
-        fig.update_xaxes(type=x_scale)
-        fig.update_yaxes(type=y_scale)
-        fig.update_layout(
-            title=dict(text=f"Scatterplot: {y_axis} vs. {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title=y_axis,
-            template=color_theme,
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
 
-    return fig, fig.to_json()  # Return style for checkbox visibility
+    elif plot_type == "histogram":
+        # histogram (1 variable - continuous)
+        fig = px.histogram(
+            df,
+            x=x_axis,
+            title=f"Histogram of {x_axis}",
+            labels={"value": x_axis},
+            nbins=10,
+        )
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
+        )
+
+    else:
+        raise ValueError("Wrong plot type.")
+    return fig, fig.to_json()
 
 
 # Callback to handle download requests using stored figure data
@@ -514,7 +290,7 @@ def update_graph(
     Input("download-jpg", "n_clicks"),
     Input("download-png", "n_clicks"),
     Input("download-svg", "n_clicks"),
-    State("stored-figure", "data"),  # Get stored figure data
+    State("stored-figure", "data"),
     prevent_initial_call=True,
 )
 def download_image(jpg_clicks, png_clicks, svg_clicks, stored_figure):
@@ -522,24 +298,24 @@ def download_image(jpg_clicks, png_clicks, svg_clicks, stored_figure):
         return
 
     # Load the figure from JSON using plotly.graph_objects
-    fig_dict = json.loads(stored_figure)  # Convert JSON string back to dictionary
-    fig = go.Figure(fig_dict)  # Create a Figure object from the dictionary
+    fig_dict = json.loads(stored_figure)
+    fig = go.Figure(fig_dict)
 
     # Determine which button was clicked and save accordingly
     file_path = ""
 
     if jpg_clicks:
         file_path = "output_image.jpg"
-        fig.write_image(file_path)  # Save as JPG
-        return dcc.send_file(file_path)  # Send file for download
+        fig.write_image(file_path)
+        return dcc.send_file(file_path)
     elif png_clicks:
         file_path = "output_image.png"
-        fig.write_image(file_path)  # Save as PNG
-        return dcc.send_file(file_path)  # Send file for download
+        fig.write_image(file_path)
+        return dcc.send_file(file_path)
     elif svg_clicks:
         file_path = "output_image.svg"
-        fig.write_image(file_path)  # Save as SVG
-        return dcc.send_file(file_path)  # Send file for download
+        fig.write_image(file_path)
+        return dcc.send_file(file_path)
 
 
 # Callback for modal popup
@@ -554,7 +330,7 @@ def toggle_modal(n1, n2, is_open):
     return is_open
 
 
-# we use a callback to toggle the collapse on small screens
+# Callback to toggle the collapse on small screens
 @app.callback(
     Output("navbar-collapse", "is_open"),
     [Input("navbar-toggler", "n_clicks")],

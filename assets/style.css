@@ -12,6 +12,7 @@
     white-space: nowrap;
 }
 
+
 .card {
     margin: 1em 0 1em 0;
     min-width: auto;
@@ -26,15 +27,11 @@ label {
     visibility: visible !important;
 }
 
-.download-button {
-    border-style: solid;
-    border-color: grey;
-    width: 10%;
-    display: inline-block;
+.btn-light {
     margin-right: 10px;
-    float: left;
 }
-.download-button:hover {
-    background-color: grey;
+.card-title {
+    margin-bottom: 20px;
+    margin-top: 20px;
     color: white;
-  }
+}
