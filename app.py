@@ -172,7 +172,13 @@ def update_graph(
         df_count.columns = [x_axis, "count"]
         fig = px.bar(df_count, x=x_axis, y="count")
         update_plot_layouts(
-            plot_type, fig, x_axis, y_axis, x_scale, y_scale, color_theme
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
         # fig.update_yaxes(type=y_scale)
         # fig.update_layout(
