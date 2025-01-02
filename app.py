@@ -84,13 +84,14 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
 def update_both_axes_variables_selection_and_scale_options(
     plot_type: str,
 ) -> tuple[list, bool, list, bool]:
-    if plot_type == "bar":  # TODO: fix
+    if plot_type == "bar":
         x_columns = [
             {"label": col, "value": col} for col in df.columns if col in cat_columns
         ]
-        y_columns = [
-            {"label": col, "value": col} for col in df.columns if col in cat_columns
-        ]  # .insert(0, {"label": "(plot only one variable)", "value": "NONE"})
+        # y_columns = [
+        #     {"label": col, "value": col} for col in df.columns if col in cat_columns
+        # ].insert(0, {"label": "(plot only one variable)", "value": "NONE"})
+        y_columns = []
         y_disabled = True
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
@@ -136,7 +137,8 @@ def update_both_axes_variables_selection_and_scale_options(
         x_columns,
         x_columns[0]["value"],
         y_columns,
-        y_columns[0]["value"],
+        # y_columns[0]["value"],
+        "",
         y_disabled,
         x_scale,
         y_scale,
