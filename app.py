@@ -165,7 +165,7 @@ def update_graph(
     trendline: list,
     plot_type: str,
 ) -> tuple[go.Figure, str]:
-    if plot_type == "bar": 
+    if plot_type == "bar":
         # bar plot (1 variable - categorical)
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
