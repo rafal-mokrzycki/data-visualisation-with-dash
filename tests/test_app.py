@@ -11,7 +11,6 @@ from app import (
     update_data_options,
     update_graph,
 )
-from utils.constants import SCALE_OPTIONS
 
 
 @pytest.mark.parametrize(
@@ -32,7 +31,13 @@ from utils.constants import SCALE_OPTIONS
                 ],
                 [
                     {"label": "price", "value": "price"},
+                    {"label": "house_type", "value": "house_type"},
                     {"label": "sqft", "value": "sqft"},
+                    {"label": "bedrooms", "value": "bedrooms"},
+                    {"label": "bathrooms", "value": "bathrooms"},
+                    {"label": "receptions", "value": "receptions"},
+                    {"label": "location", "value": "location"},
+                    {"label": "city", "value": "city"},
                 ],
                 "price",
                 "price",
@@ -41,7 +46,6 @@ from utils.constants import SCALE_OPTIONS
     ],
 )
 def test_update_data_options(test_input, expected):
-    # TODO: mock global df and global cat_columns
     output = update_data_options(test_input)
     assert output == expected
 
@@ -52,10 +56,26 @@ def test_update_data_options(test_input, expected):
         (
             "pie",
             (
+                [
+                    {"label": "house_type", "value": "house_type"},
+                    {"label": "bedrooms", "value": "bedrooms"},
+                    {"label": "bathrooms", "value": "bathrooms"},
+                    {"label": "receptions", "value": "receptions"},
+                    {"label": "location", "value": "location"},
+                    {"label": "city", "value": "city"},
+                ],
+                "house_type",
                 [{"label": "", "value": ""}],
+                "",
                 True,
-                [{"label": "Nominal", "value": "Nominal"}],
-                "Nominal",
+                [
+                    {"label": "Linear", "value": "linear", "disabled": True},
+                    {"label": "Logarithmic", "value": "log", "disabled": True},
+                ],
+                [
+                    {"label": "Linear", "value": "linear", "disabled": True},
+                    {"label": "Logarithmic", "value": "log", "disabled": True},
+                ],
             ),
         ),
         (
@@ -65,9 +85,21 @@ def test_update_data_options(test_input, expected):
                     {"label": "price", "value": "price"},
                     {"label": "sqft", "value": "sqft"},
                 ],
+                "price",
+                [
+                    {"label": "price", "value": "price"},
+                    {"label": "sqft", "value": "sqft"},
+                ],
+                "price",
                 False,
-                SCALE_OPTIONS,
-                "linear",
+                [
+                    {"label": "Linear", "value": "linear"},
+                    {"label": "Logarithmic", "value": "log"},
+                ],
+                [
+                    {"label": "Linear", "value": "linear"},
+                    {"label": "Logarithmic", "value": "log"},
+                ],
             ),
         ),
     ],
@@ -81,29 +113,39 @@ def test_update_both_axes_variables_selection_and_scale_options(test_input, expe
     "test_input,expected",
     [
         (
-            ("price", "sqft", "linear", "linear", "ggplot2", True),
+            ("price", "sqft", "linear", "linear", "ggplot2", True, "scatter"),
             (go.Figure, str),
         ),
     ],
 )
 def test_update_graph(test_input, expected):
-    x_axis, y_axis, x_scale, y_scale, color_theme, trendline = test_input
-    output = update_graph(x_axis, y_axis, x_scale, y_scale, color_theme, trendline)
+    x_axis, y_axis, x_scale, y_scale, color_theme, trendline, plot_type = test_input
+    output = update_graph(
+        x_axis, y_axis, x_scale, y_scale, color_theme, trendline, plot_type
+    )
     assert [type(i) for i in output] == [i for i in expected]
 
 
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        ((False, False, True, None), "output_image.svg"),
-        ((False, True, False, None), "output_image.png"),
-        ((True, False, False, None), "output_image.jpg"),
+        ((False, False, True, None, "scatter"), "output_image.svg"),
+        ((False, True, False, None, "scatter"), "output_image.png"),
+        ((True, False, False, None, "scatter"), "output_image.jpg"),
     ],
 )
 def test_download_image(test_input, expected):
     # TODO: mock plot
-    jpg, png, svg, data = test_input
-    _, data = update_graph("price", "sqft", "linear", "linear", "ggplot2", True)
+    jpg, png, svg, data, plot_type = test_input
+    _, data = update_graph(
+        "price",
+        "sqft",
+        "linear",
+        "linear",
+        "ggplot2",
+        True,
+        plot_type,
+    )
     output = download_image(jpg, png, svg, data)
     assert output["filename"] == expected
 
