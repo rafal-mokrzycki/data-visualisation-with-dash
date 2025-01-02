@@ -101,8 +101,10 @@ def update_both_axes_variables_selection_and_scale_options(
         y_scale = SCALE_OPTIONS_BOTH_DISABLED
 
     elif plot_type == "box":  # TODO: fix for different boxplots types
-        x_columns = [{"label": col, "value": col} for col in df.columns]
-        y_columns = [{"label": col, "value": col} for col in df.columns]
+        x_columns = [{"label": "(plot only one variable)", "value": "no_value"}]
+        y_columns = [
+            {"label": col, "value": col} for col in df.columns if col not in cat_columns
+        ]
         y_disabled = False
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
@@ -208,11 +210,11 @@ def update_graph(
             yaxis_title=f"Distribution of {y_axis}",
         )
 
-    elif plot_type == "box" and x_axis not in cat_columns:
+    elif plot_type == "box":
         #  plot (1 variable - continuous)
         fig = px.box(
             df,
-            y=x_axis,
+            y=y_axis,
         )
 
         fig.update_yaxes(type=y_scale)
