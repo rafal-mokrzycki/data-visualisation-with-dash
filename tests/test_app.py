@@ -7,9 +7,9 @@ from app import (
     download_image,
     toggle_modal,
     toggle_navbar_collapse,
+    update_both_axes_variables_selection_and_scale_options,
     update_data_options,
     update_graph,
-    update_y_axis_variables_selection,
 )
 from utils.constants import SCALE_OPTIONS
 
@@ -50,7 +50,7 @@ def test_update_data_options(test_input, expected):
     "test_input,expected",
     [
         (
-            "house_type",
+            "pie",
             (
                 [{"label": "", "value": ""}],
                 True,
@@ -59,7 +59,7 @@ def test_update_data_options(test_input, expected):
             ),
         ),
         (
-            "price",
+            "scatter",
             (
                 [
                     {"label": "price", "value": "price"},
@@ -72,8 +72,8 @@ def test_update_data_options(test_input, expected):
         ),
     ],
 )
-def test_update_y_axis_variables_selection(test_input, expected):
-    output = update_y_axis_variables_selection(test_input)
+def test_update_both_axes_variables_selection_and_scale_options(test_input, expected):
+    output = update_both_axes_variables_selection_and_scale_options(test_input)
     assert output == expected
 
 

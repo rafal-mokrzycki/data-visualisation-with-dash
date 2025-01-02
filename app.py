@@ -73,7 +73,9 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
 
 @app.callback(
     Output("x-axis-selector", "options", allow_duplicate=True),
+    Output("x-axis-selector", "value", allow_duplicate=True),
     Output("y-axis-selector", "options", allow_duplicate=True),
+    Output("y-axis-selector", "value", allow_duplicate=True),
     Output("y-axis-selector", "disabled", allow_duplicate=True),
     Output("x-axis-scale", "options", allow_duplicate=True),
     Output("y-axis-scale", "options", allow_duplicate=True),
@@ -82,14 +84,14 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
 def update_both_axes_variables_selection_and_scale_options(
     plot_type: str,
 ) -> tuple[list, bool, list, bool]:
-    y_disabled = False
     if plot_type == "bar":  # TODO: fix
         x_columns = [
             {"label": col, "value": col} for col in df.columns if col in cat_columns
         ]
         y_columns = [
             {"label": col, "value": col} for col in df.columns if col in cat_columns
-        ].insert(0, {"label": "(plot only one variable)", "value": None})
+        ]  # .insert(0, {"label": "(plot only one variable)", "value": "NONE"})
+        y_disabled = True
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
 
@@ -105,6 +107,7 @@ def update_both_axes_variables_selection_and_scale_options(
     elif plot_type == "box":  # TODO: fix for different boxplots types
         x_columns = [{"label": col, "value": col} for col in df.columns]
         y_columns = [{"label": col, "value": col} for col in df.columns]
+        y_disabled = False
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
     elif plot_type == "histogram":
@@ -112,6 +115,7 @@ def update_both_axes_variables_selection_and_scale_options(
             {"label": col, "value": col} for col in df.columns if col not in cat_columns
         ]
         y_columns = [{"label": "", "value": ""}]
+        y_disabled = False
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
 
@@ -122,6 +126,7 @@ def update_both_axes_variables_selection_and_scale_options(
         y_columns = [
             {"label": col, "value": col} for col in df.columns if col not in cat_columns
         ]
+        y_disabled = False
         x_scale = SCALE_OPTIONS
         y_scale = SCALE_OPTIONS
 
@@ -129,7 +134,9 @@ def update_both_axes_variables_selection_and_scale_options(
         raise ValueError("Something went wrong.")
     return (
         x_columns,
+        x_columns[0]["value"],
         y_columns,
+        y_columns[0]["value"],
         y_disabled,
         x_scale,
         y_scale,
@@ -158,21 +165,24 @@ def update_graph(
     plot_type: str,
 ) -> tuple[go.Figure, str]:
     if plot_type == "bar" and x_axis in cat_columns and y_axis in cat_columns:
-        # bar plot (2 variables - categorical + categorical)
-        df_grouped = df.groupby([x_axis, y_axis]).size().reset_index(name="count")
+        # TODO: implement
+        pass
+        # # bar plot (2 variables - categorical + categorical)
+        # df_grouped = df.groupby([x_axis, y_axis]).size().reset_index(name="count")
 
-        fig = px.bar(df_grouped, x=x_axis, y="count", color=y_axis, barmode="group")
+        # fig = px.bar(df_grouped, x=x_axis, y="count", color=y_axis, barmode="group")
 
-        fig.update_yaxes(type=y_scale)
+        # fig.update_yaxes(type=y_scale)
 
-        fig.update_layout(
-            title=dict(text=f"Barplot: {x_axis}/{y_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title="Count",
-            template=color_theme,
-        )
-    elif plot_type == "bar" and x_axis in cat_columns and y_axis is None:
+        # fig.update_layout(
+        #     title=dict(text=f"Barplot: {x_axis}/{y_axis}", font=dict(size=24)),
+        #     title_x=0.5,
+        #     xaxis_title=x_axis,
+        #     yaxis_title="Count",
+        #     template=color_theme,
+        # )
+    if plot_type == "bar":  # and x_axis in cat_columns:
+        # elif plot_type == "bar" and x_axis in cat_columns and y_axis == "NONE":
         # bar plot (1 variable - categorical)
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
@@ -208,8 +218,7 @@ def update_graph(
             # color="y_axis",  # Categorical variable for color differentiation
         )
 
-        if y_scale == "log":
-            fig.update_yaxes(type="log")
+        fig.update_yaxes(type=y_scale)
 
         fig.update_layout(
             title=dict(
