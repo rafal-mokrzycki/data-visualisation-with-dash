@@ -44,31 +44,31 @@ app.layout = html.Div(
 )
 
 
-# Callback to update dataframe based on user selection
-@app.callback(
-    Output("x-axis-selector", "options", allow_duplicate=True),
-    Output("y-axis-selector", "options", allow_duplicate=True),
-    Output("x-axis-selector", "value", allow_duplicate=True),
-    Output("y-axis-selector", "value", allow_duplicate=True),
-    Input("dataset-selector", "value"),
-)
-def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
-    global df
-    global cat_columns
-    df, cat_columns = get_dataframe_to_plot(selected_dataset)
+# # Callback to update dataframe based on user selection
+# @app.callback(
+#     Output("x-axis-selector", "options", allow_duplicate=True),
+#     Output("y-axis-selector", "options", allow_duplicate=True),
+#     Output("x-axis-selector", "value", allow_duplicate=True),
+#     Output("y-axis-selector", "value", allow_duplicate=True),
+#     Input("dataset-selector", "value"),
+# )
+# def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
+#     global df
+#     global cat_columns
+#     df, cat_columns = get_dataframe_to_plot(selected_dataset)
 
-    # Generate options for x and y axis selectors based on dataframe columns
-    x_options = [{"label": col, "value": col} for col in df.columns]
-    y_options = [
-        {"label": col, "value": col} for col in df.columns
-    ]  # if col not in cat_columns]
+#     # Generate options for x and y axis selectors based on dataframe columns
+#     x_options = [{"label": col, "value": col} for col in df.columns]
+#     y_options = [
+#         {"label": col, "value": col} for col in df.columns
+#     ]  # if col not in cat_columns]
 
-    return (
-        x_options,
-        y_options,
-        x_options[0]["value"],
-        y_options[0]["value"],
-    )
+#     return (
+#         x_options,
+#         y_options,
+#         x_options[0]["value"],
+#         y_options[0]["value"],
+#     )
 
 
 @app.callback(
@@ -79,11 +79,17 @@ def update_data_options(selected_dataset: str) -> tuple[list, list, str, str]:
     Output("y-axis-selector", "disabled", allow_duplicate=True),
     Output("x-axis-scale", "options", allow_duplicate=True),
     Output("y-axis-scale", "options", allow_duplicate=True),
+    Input("dataset-selector", "value"),
     Input("plot-type-selector", "value"),
 )
 def update_both_axes_variables_selection_and_scale_options(
+    selected_dataset: str,
     plot_type: str,
 ) -> tuple[list, bool, list, bool]:
+    global df
+    global cat_columns
+    df, cat_columns = get_dataframe_to_plot(selected_dataset)
+
     if plot_type == "bar":
         x_columns = [
             {"label": col, "value": col} for col in df.columns if col in cat_columns
@@ -168,7 +174,7 @@ def update_graph(
 ) -> tuple[go.Figure, str]:
     if plot_type == "bar":
         if y_axis.lower() == "no_value":
-            # bar plot (1 variable - categorical)
+            # Bar plot (1 variable - categorical)
             df_count = df[x_axis].value_counts().reset_index()
             df_count.columns = [x_axis, "count"]
             fig = px.bar(df_count, x=x_axis, y="count")
@@ -181,7 +187,7 @@ def update_graph(
                 template=color_theme,
             )
         elif y_axis in cat_columns:
-            # bar plot (2 variables - categorical + categorical)
+            # Bar plot (2 variables - categorical + categorical)
             df_grouped = df.groupby([x_axis, y_axis]).size().reset_index(name="count")
             fig = px.bar(df_grouped, x=x_axis, y="count", color=y_axis, barmode="group")
             fig.update_yaxes(type=y_scale)
