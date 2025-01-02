@@ -101,7 +101,10 @@ def update_both_axes_variables_selection_and_scale_options(
         y_scale = SCALE_OPTIONS_BOTH_DISABLED
 
     elif plot_type == "box":  # TODO: fix for different boxplots types
-        x_columns = [{"label": "(plot only one variable)", "value": "no_value"}]
+        x_columns = [
+            {"label": col, "value": col} for col in df.columns if col in cat_columns
+        ]
+        x_columns.insert(0, {"label": "(plot only one variable)", "value": "no_value"})
         y_columns = [
             {"label": col, "value": col} for col in df.columns if col not in cat_columns
         ]
@@ -162,7 +165,7 @@ def update_graph(
     trendline: list,
     plot_type: str,
 ) -> tuple[go.Figure, str]:
-    if plot_type == "bar":  # and x_axis in cat_columns:
+    if plot_type == "bar": 
         # bar plot (1 variable - categorical)
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
@@ -189,44 +192,45 @@ def update_graph(
             title=dict(text=f"Pie chart: {x_axis}", font=dict(size=24)),
             title_x=0.5,
         )
-    elif plot_type == "box" and x_axis in cat_columns and y_axis not in cat_columns:
-        # box plot (2 variables - categorical + continuous)
-        fig = px.box(
-            df,
-            x=x_axis,  # Categorical variable for x-axis
-            y=y_axis,  # Numerical variable for y-axis
-            # color="y_axis",  # Categorical variable for color differentiation
-        )
-
-        fig.update_yaxes(type=y_scale)
-
-        fig.update_layout(
-            title=dict(
-                text="Box Plot: Value Distribution by Categories",
-                font=dict(size=24),
-            ),
-            title_x=0.5,
-            xaxis_title=f"Categories ({x_axis})",
-            yaxis_title=f"Distribution of {y_axis}",
-        )
-
     elif plot_type == "box":
-        #  plot (1 variable - continuous)
-        fig = px.box(
-            df,
-            y=y_axis,
-        )
+        # box plot (2 variables - categorical + continuous)
+        try:
+            fig = px.box(
+                df,
+                x=x_axis,  # Categorical variable for x-axis
+                y=y_axis,  # Numerical variable for y-axis
+                # color="y_axis",  # Categorical variable for color differentiation
+            )
 
-        fig.update_yaxes(type=y_scale)
+            fig.update_yaxes(type=y_scale)
 
-        fig.update_layout(
-            title=dict(
-                text=f"Box Plot: Distribution of {x_axis}",
-                font=dict(size=24),
-            ),
-            title_x=0.5,
-            yaxis_title=f"Distribution of {x_axis}",
-        )
+            fig.update_layout(
+                title=dict(
+                    text=f"Box Plot: distribution of {y_axis} by categories of {x_axis}",
+                    font=dict(size=24),
+                ),
+                title_x=0.5,
+                xaxis_title=f"Categories of {x_axis}",
+                yaxis_title=f"Distribution of {y_axis}",
+            )
+        except ValueError:
+            #  plot (1 variable - continuous)
+            fig = px.box(
+                df,
+                y=y_axis,
+            )
+
+            fig.update_yaxes(type=y_scale)
+
+            fig.update_layout(
+                title=dict(
+                    text=f"Box Plot: distribution of {y_axis}",
+                    font=dict(size=24),
+                ),
+                title_x=0.5,
+                yaxis_title=f"Distribution of {y_axis}",
+            )
+
     elif plot_type == "scatter":
         # scatter plot (2 variables - continuous + continuous)
         if trendline:
