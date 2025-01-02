@@ -180,14 +180,7 @@ def update_graph(
             y_scale=y_scale,
             color_theme=color_theme,
         )
-        # fig.update_yaxes(type=y_scale)
-        # fig.update_layout(
-        #     title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
-        #     title_x=0.5,
-        #     xaxis_title=x_axis,
-        #     yaxis_title="Count",
-        #     template=color_theme,
-        # )
+
     elif plot_type == "pie":
         # pie plot (1 variable - categorical)
         df_grouped = df.groupby(x_axis).size().reset_index(name="count")
@@ -198,9 +191,14 @@ def update_graph(
             values="count",
         )
 
-        fig.update_layout(
-            title=dict(text=f"Pie chart: {x_axis}", font=dict(size=24)),
-            title_x=0.5,
+        update_plot_layouts(
+            plot_type,
+            fig,
+            x_axis=x_axis,
+            y_axis=y_axis,
+            x_scale=x_scale,
+            y_scale=y_scale,
+            color_theme=color_theme,
         )
     elif plot_type == "box":
         # box plot (2 variables - categorical + continuous)

@@ -13,3 +13,8 @@ def update_plot_layouts(plot_type: str, fig: go.Figure, **kwargs):
                 yaxis_title="Count",
                 template=kwargs["color_theme"],
             )
+        case "pie":
+            fig.update_layout(
+                title=dict(text=f"Pie chart: {kwargs['x_axis']}", font=dict(size=24)),
+                title_x=0.5,
+            )
