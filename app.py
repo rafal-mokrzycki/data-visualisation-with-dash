@@ -92,7 +92,7 @@ def update_both_axes_variables_selection_and_scale_options(
             {"label": col, "value": col} for col in df.columns if col in cat_columns
         ]
         # Add element needed for one variable plot at the beginning of the list
-        y_columns.insert(0, {"label": "(plot only one variable)", "value": "NONE"})
+        y_columns.insert(0, {"label": "(plot only one variable)", "value": "no_value"})
         y_disabled = False
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS
@@ -166,37 +166,32 @@ def update_graph(
     trendline: list,
     plot_type: str,
 ) -> tuple[go.Figure, str]:
-    if plot_type == "bar" and x_axis in cat_columns and y_axis in cat_columns:
-        # TODO: implement
-        pass
-        # # bar plot (2 variables - categorical + categorical)
-        # df_grouped = df.groupby([x_axis, y_axis]).size().reset_index(name="count")
-
-        # fig = px.bar(df_grouped, x=x_axis, y="count", color=y_axis, barmode="group")
-
-        # fig.update_yaxes(type=y_scale)
-
-        # fig.update_layout(
-        #     title=dict(text=f"Barplot: {x_axis}/{y_axis}", font=dict(size=24)),
-        #     title_x=0.5,
-        #     xaxis_title=x_axis,
-        #     yaxis_title="Count",
-        #     template=color_theme,
-        # )
-    if plot_type == "bar":  # and x_axis in cat_columns:
-        # elif plot_type == "bar" and x_axis in cat_columns and y_axis == "NONE":
-        # bar plot (1 variable - categorical)
-        df_count = df[x_axis].value_counts().reset_index()
-        df_count.columns = [x_axis, "count"]
-        fig = px.bar(df_count, x=x_axis, y="count")
-        fig.update_yaxes(type=y_scale)
-        fig.update_layout(
-            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title="Count",
-            template=color_theme,
-        )
+    if plot_type == "bar":
+        if y_axis.lower() == "no_value":
+            # bar plot (1 variable - categorical)
+            df_count = df[x_axis].value_counts().reset_index()
+            df_count.columns = [x_axis, "count"]
+            fig = px.bar(df_count, x=x_axis, y="count")
+            fig.update_yaxes(type=y_scale)
+            fig.update_layout(
+                title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
+                title_x=0.5,
+                xaxis_title=x_axis,
+                yaxis_title="Count",
+                template=color_theme,
+            )
+        elif y_axis in cat_columns:
+            # bar plot (2 variables - categorical + categorical)
+            df_grouped = df.groupby([x_axis, y_axis]).size().reset_index(name="count")
+            fig = px.bar(df_grouped, x=x_axis, y="count", color=y_axis, barmode="group")
+            fig.update_yaxes(type=y_scale)
+            fig.update_layout(
+                title=dict(text=f"Barplot: {x_axis}/{y_axis}", font=dict(size=24)),
+                title_x=0.5,
+                xaxis_title=x_axis,
+                yaxis_title="Count",
+                template=color_theme,
+            )
     elif plot_type == "pie":
         # pie plot (1 variable - categorical)
         df_grouped = df.groupby(x_axis).size().reset_index(name="count")
