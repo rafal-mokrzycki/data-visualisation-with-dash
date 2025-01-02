@@ -13,6 +13,7 @@ from templates.header import header
 from templates.plotting import plotting
 from templates.sidebar import sidebar
 from utils.constants import SCALE_OPTIONS, SCALE_OPTIONS_BOTH_DISABLED
+from utils.display import update_plot_layouts
 
 # Global variable to store the dataframe
 df, cat_columns = get_dataframe_to_plot()
@@ -170,14 +171,17 @@ def update_graph(
         df_count = df[x_axis].value_counts().reset_index()
         df_count.columns = [x_axis, "count"]
         fig = px.bar(df_count, x=x_axis, y="count")
-        fig.update_yaxes(type=y_scale)
-        fig.update_layout(
-            title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
-            title_x=0.5,
-            xaxis_title=x_axis,
-            yaxis_title="Count",
-            template=color_theme,
+        update_plot_layouts(
+            plot_type, fig, x_axis, y_axis, x_scale, y_scale, color_theme
         )
+        # fig.update_yaxes(type=y_scale)
+        # fig.update_layout(
+        #     title=dict(text=f"Barplot: {x_axis}", font=dict(size=24)),
+        #     title_x=0.5,
+        #     xaxis_title=x_axis,
+        #     yaxis_title="Count",
+        #     template=color_theme,
+        # )
     elif plot_type == "pie":
         # pie plot (1 variable - categorical)
         df_grouped = df.groupby(x_axis).size().reset_index(name="count")
