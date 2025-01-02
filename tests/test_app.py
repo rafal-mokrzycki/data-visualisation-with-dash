@@ -21,23 +21,11 @@ from app import (
             (
                 [
                     {"label": "price", "value": "price"},
-                    {"label": "house_type", "value": "house_type"},
                     {"label": "sqft", "value": "sqft"},
-                    {"label": "bedrooms", "value": "bedrooms"},
-                    {"label": "bathrooms", "value": "bathrooms"},
-                    {"label": "receptions", "value": "receptions"},
-                    {"label": "location", "value": "location"},
-                    {"label": "city", "value": "city"},
                 ],
                 [
                     {"label": "price", "value": "price"},
-                    {"label": "house_type", "value": "house_type"},
                     {"label": "sqft", "value": "sqft"},
-                    {"label": "bedrooms", "value": "bedrooms"},
-                    {"label": "bathrooms", "value": "bathrooms"},
-                    {"label": "receptions", "value": "receptions"},
-                    {"label": "location", "value": "location"},
-                    {"label": "city", "value": "city"},
                 ],
                 "price",
                 "price",
