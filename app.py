@@ -100,7 +100,7 @@ def update_both_axes_variables_selection_and_scale_options(
         x_scale = SCALE_OPTIONS_BOTH_DISABLED
         y_scale = SCALE_OPTIONS_BOTH_DISABLED
 
-    elif plot_type == "box":  # TODO: fix for different boxplots types
+    elif plot_type == "box":
         x_columns = [
             {"label": col, "value": col} for col in df.columns if col in cat_columns
         ]

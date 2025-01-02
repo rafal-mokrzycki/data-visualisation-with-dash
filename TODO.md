@@ -14,4 +14,5 @@
 [ ] 3 variables plotting
 [ ] 3D plotting
 [ ] Change plot colors feature
+[ ] Move plot layouts to a different dir
 [x] Add tests
