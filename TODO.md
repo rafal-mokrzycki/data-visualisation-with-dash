@@ -8,5 +8,5 @@
 [x] Add another dataset to choose from
 [x] Add a switch to plot either of the two datasets
 [x] Trendline feature
-[ ] Add slider for nbins for histogram
+[x] Add slider for nbins for histogram
 [x] Add tests

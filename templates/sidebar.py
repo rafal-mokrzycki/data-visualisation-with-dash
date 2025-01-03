@@ -103,7 +103,7 @@ sidebar = [
                     dcc.Dropdown(
                         id="plot-type-selector",
                         options=PLOT_TYPES,
-                        value="",  # TODO: choose
+                        value="scatter",
                         style={"color": "black"},
                     ),
                     html.Div(
@@ -113,17 +113,18 @@ sidebar = [
                                 className="card-title",
                             ),
                             dcc.Slider(
+                                id="nbins-selector",
                                 min=2,
                                 max=20,
                                 step=1,
                                 value=10,
                                 marks=None,
                                 tooltip={"placement": "bottom", "always_visible": True},
-                                id="my-slider",
                             ),
                             html.Div(id="output-container-slider"),
                         ],
-                        style={"display": "block", "marginTop": "30px"},
+                        style={"display": "none"},
+                        id="outer-output-container-slider",
                     ),
                     html.Div(
                         dbc.Accordion(

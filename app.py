@@ -160,7 +160,7 @@ def update_both_axes_variables_selection_and_scale_options(
     Input("color-theme-selector", "value"),
     Input("scatter-plot-trendline", "value"),
     Input("plot-type-selector", "value"),
-    Input("plot-type-selector", "value"),
+    Input("nbins-selector", "value"),
 )
 def update_graph(
     x_axis: str,
@@ -170,6 +170,7 @@ def update_graph(
     color_theme: str,
     trendline: list,
     plot_type: str,
+    nbins: int,
 ) -> tuple[go.Figure, str]:
     if plot_type == "bar":
         # bar plot (1 variable - categorical)
@@ -268,7 +269,7 @@ def update_graph(
             x=x_axis,
             title=f"Histogram of {x_axis}",
             labels={"value": x_axis},
-            nbins=10,
+            nbins=nbins,
         )
         update_plot_layouts(
             plot_type,
@@ -283,6 +284,20 @@ def update_graph(
     else:
         raise ValueError("Wrong plot type.")
     return fig, fig.to_json()
+
+
+@app.callback(
+    Output("outer-output-container-slider", "style"),
+    Input("plot-type-selector", "value"),
+)
+def toggle_slider_visibility(plot_type):
+    if plot_type == "histogram":
+        return {
+            "display": "block",
+            "marginTop": "30px",
+        }
+    else:
+        return {"display": "none"}
 
 
 # Callback to handle download requests using stored figure data
