@@ -28,16 +28,6 @@ sidebar = [
                         value="Housing Data",
                         style={"color": "black"},
                     ),
-                    html.H5(
-                        "Select plot type",
-                        className="card-title",
-                    ),
-                    dcc.Dropdown(
-                        id="plot-type-selector",
-                        options=PLOT_TYPES,
-                        value="scatter",
-                        style={"color": "black"},
-                    ),
                     # Title for selecting variables with spacing
                     html.H5(
                         "Select variables",
@@ -105,6 +95,36 @@ sidebar = [
                                 inputStyle={"marginRight": "5px"},
                             ),
                         ]
+                    ),
+                    html.H5(
+                        "Select plot type",
+                        className="card-title",
+                    ),
+                    dcc.Dropdown(
+                        id="plot-type-selector",
+                        options=PLOT_TYPES,
+                        value="scatter",
+                        style={"color": "black"},
+                    ),
+                    html.Div(
+                        [
+                            html.H5(
+                                "number of bins",
+                                className="card-title",
+                            ),
+                            dcc.Slider(
+                                id="nbins-selector",
+                                min=2,
+                                max=20,
+                                step=1,
+                                value=10,
+                                marks=None,
+                                tooltip={"placement": "bottom", "always_visible": True},
+                            ),
+                            html.Div(id="output-container-slider"),
+                        ],
+                        style={"display": "none"},
+                        id="outer-output-container-slider",
                     ),
                     html.Div(
                         dbc.Accordion(

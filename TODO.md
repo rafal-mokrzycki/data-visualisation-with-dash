@@ -8,11 +8,5 @@
 [x] Add another dataset to choose from
 [x] Add a switch to plot either of the two datasets
 [x] Trendline feature
-[x] Implement different type of charts display
-[x] Add callbacks for different chart and variable combinations
-[x] Rollback logarithmic scale feature
-[ ] 3 variables plotting
-[ ] 3D plotting
-[ ] Change plot colors feature
-[x] Move plot layouts to a different dir
+[x] Add slider for nbins for histogram
 [x] Add tests
