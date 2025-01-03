@@ -22,7 +22,6 @@ from app import (
                 [
                     {"label": "price", "value": "price"},
                     {"label": "sqft", "value": "sqft"},
-
                 ],
                 [
                     {"label": "price", "value": "price"},
