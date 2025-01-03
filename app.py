@@ -160,6 +160,7 @@ def update_both_axes_variables_selection_and_scale_options(
     Input("color-theme-selector", "value"),
     Input("scatter-plot-trendline", "value"),
     Input("plot-type-selector", "value"),
+    Input("plot-type-selector", "value"),
 )
 def update_graph(
     x_axis: str,
