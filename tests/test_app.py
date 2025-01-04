@@ -7,6 +7,7 @@ from app import (
     download_image,
     toggle_modal,
     toggle_navbar_collapse,
+    toggle_slider_visibility,
     update_both_axes_variables_selection_and_scale_options,
     update_data_options,
     update_graph,
@@ -101,15 +102,17 @@ def test_update_both_axes_variables_selection_and_scale_options(test_input, expe
     "test_input,expected",
     [
         (
-            ("price", "sqft", "linear", "linear", "ggplot2", True, "scatter"),
+            ("price", "sqft", "linear", "linear", "ggplot2", True, "scatter", None),
             (go.Figure, str),
         ),
     ],
 )
 def test_update_graph(test_input, expected):
-    x_axis, y_axis, x_scale, y_scale, color_theme, trendline, plot_type = test_input
+    x_axis, y_axis, x_scale, y_scale, color_theme, trendline, plot_type, nbins = (
+        test_input
+    )
     output = update_graph(
-        x_axis, y_axis, x_scale, y_scale, color_theme, trendline, plot_type
+        x_axis, y_axis, x_scale, y_scale, color_theme, trendline, plot_type, nbins
     )
     assert [type(i) for i in output] == [i for i in expected]
 
@@ -117,21 +120,32 @@ def test_update_graph(test_input, expected):
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        ((False, False, True, None, "scatter"), "output_image.svg"),
-        ((False, True, False, None, "scatter"), "output_image.png"),
-        ((True, False, False, None, "scatter"), "output_image.jpg"),
+        (
+            "histogram",
+            {"display": "block", "marginTop": "30px"},
+        ),  # Test case for histogram
+        ("bar", {"display": "none"}),  # Test case for bar plot
+        ("pie", {"display": "none"}),  # Test case for pie plot
+    ],
+)
+def test_toggle_slider_visibility(test_input, expected):
+    plot_type = test_input
+    output = toggle_slider_visibility(plot_type)
+    assert output == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ((False, False, True, None, "scatter", None), "output_image.svg"),
+        ((False, True, False, None, "scatter", None), "output_image.png"),
+        ((True, False, False, None, "scatter", None), "output_image.jpg"),
     ],
 )
 def test_download_image(test_input, expected):
-    jpg, png, svg, data, plot_type = test_input
+    jpg, png, svg, data, plot_type, nbins = test_input
     _, data = update_graph(
-        "price",
-        "sqft",
-        "linear",
-        "linear",
-        "ggplot2",
-        True,
-        plot_type,
+        "price", "sqft", "linear", "linear", "ggplot2", True, plot_type, nbins
     )
     output = download_image(jpg, png, svg, data)
     assert output["filename"] == expected
