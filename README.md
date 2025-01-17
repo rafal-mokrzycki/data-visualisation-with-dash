@@ -8,21 +8,27 @@ An interactive economic data plotter that allows users to visualize **two datase
 
 enabling users to tailor the visual appearance of their plots to better suit their presentation needs. Additionally, users have the option to **download** their visualizations in multiple formats, including PNG, JPG, and SVG, ensuring compatibility with various applications and platforms. This tool aims to facilitate data analysis and improve the accessibility of economic data visualization for users of all skill levels.
 
-### Installation
+### Installation and Usage
+
+#### Using Docker
+
+```
+docker-compose build
+docker-compose up
+```
+
+Go to [http://0.0.0.0:8080/](http://0.0.0.0:8080/) in your browser.
+
+#### Without contenerization
 
 ```
 python -m venv .venv
 source .venv/bin/activate # (.venv\Scripts\activate for Windows)
 pip install -r requirements.txt
-```
-### Usage
-
-```
-source .venv/bin/activate # (.venv\Scripts\activate for Windows)
 python -m app
 ```
 
-Go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
+Go to [http://0.0.0.0:8080/](http://0.0.0.0:8080/) in your browser.
 
 1. You can now plot the data by selecting columns, scales and color theme.
 
