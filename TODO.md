@@ -10,3 +10,4 @@
 [x] Trendline feature
 [x] Add slider for nbins for histogram
 [x] Add tests
+[x] Add contenerization
