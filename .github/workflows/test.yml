@@ -9,13 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      dash_app:
-        build: .
-        ports:
-          - "8080:8080"
-        environment:
-          - FLASK_ENV=development
 
     steps:
       # Checkout the repository
